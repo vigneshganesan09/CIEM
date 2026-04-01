@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Anugal CIEM v2 — Multi-Account · Human &amp; Machine Identity</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1c0f48;--navy-mid:#2a1866;--navy-light:#3d2480;
+  --purple:#7c3aed;--ps:#7c6af7;--p100:#ddd6fe;--p50:#ede9fe;
+  --bg:#edf2f8;--sf:#fff;--sf2:#f4f5fa;--bd:#e2e8f0;
+  --tx:#0f0a2e;--mu:#64748b;--hi:#94a3b8;
+  --aws:#ff9900;--awsbg:#fff7ed;--awsb:#fed7aa;
+  --az:#0078d4;--azbg:#eff6ff;--azb:#93c5fd;
+  --gcp:#4285f4;--gcpbg:#f0f9ff;--gcpb:#7dd3fc;
+  --oci:#c74634;--ocibg:#fff1f0;--ocib:#fca5a5;
+  --red:#dc2626;--rbg:#fee2e2;--rb:#fca5a5;
+  --amber:#d97706;--abg:#fef3c7;--ab:#fcd34d;
+  --grn:#16a34a;--gbg:#dcfce7;--gbd:#86efac;
+  --teal:#0d9488;--tbg:#ccfbf1;
+  --orange:#ea580c;--obg:#ffedd5;
+  --mach:#0891b2;--machbg:#ecfeff;--machb:#67e8f9;
+  --human:#7c3aed;--humanbg:#ede9fe;
+  --sb:224px;--tb:54px;
+  --fn:'Plus Jakarta Sans',sans-serif;--mo:'DM Mono',monospace;
+  --r:8px;--rs:5px;--rl:12px;
+}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh;display:flex;overflow:hidden;font-size:13px}
+.sidebar{width:var(--sb);min-height:100vh;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;position:fixed;inset:0 auto 0 0;z-index:100;overflow-y:auto}
+.logo{padding:15px 16px 12px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:9px}
+.lm{width:27px;height:27px;background:linear-gradient(135deg,var(--ps),#a78bfa);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lm svg{width:13px;height:13px}
+.lt{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.ls{font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px}
+.ns{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.22);padding:13px 15px 5px}
+.ni{display:flex;align-items:center;gap:7px;padding:7px 11px;margin:1px 6px;border-radius:var(--rs);cursor:pointer;font-size:11px;font-weight:600;color:rgba(255,255,255,.48);transition:all .15s;border:none;background:none;width:calc(100% - 12px);text-align:left}
+.ni:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.ni.active{background:rgba(124,106,247,.22);color:#fff}
+.ni svg{width:14px;height:14px;flex-shrink:0;opacity:.65}
+.ni.active svg{opacity:1;color:var(--ps)}
+.cni{display:flex;align-items:center;gap:7px;padding:7px 11px;margin:1px 6px;border-radius:var(--rs);cursor:pointer;font-size:11px;font-weight:600;color:rgba(255,255,255,.48);transition:all .15s;border:none;background:none;width:calc(100% - 12px);text-align:left}
+.cni:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.cni.active{background:rgba(124,106,247,.22);color:#fff}
+.cbadge{font-size:8px;font-weight:800;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.acn{margin-left:auto;font-size:9px;font-weight:700;background:rgba(255,255,255,.1);color:rgba(255,255,255,.55);padding:1px 6px;border-radius:20px}
+.dot{width:5px;height:5px;border-radius:50%}
+.dok{background:var(--grn)}.der{background:var(--red)}.dwa{background:var(--amber)}.dof{background:rgba(255,255,255,.18)}
+.sf{margin-top:auto;padding:11px 9px;border-top:1px solid rgba(255,255,255,.07)}
+.ur{display:flex;align-items:center;gap:8px;padding:5px 6px}
+.av{width:27px;height:27px;border-radius:50%;background:var(--ps);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.un{font-size:11px;font-weight:600;color:rgba(255,255,255,.78)}
+.uro{font-size:9px;color:rgba(255,255,255,.28)}
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-height:100vh;overflow-y:auto}
+.topbar{height:var(--tb);background:var(--sf);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50}
+.bc{font-size:12px;color:var(--mu);display:flex;align-items:center;gap:5px}
+.bc strong{color:var(--tx);font-weight:700}
+.bc svg{width:9px;height:9px}
+.tr{margin-left:auto;display:flex;align-items:center;gap:7px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--rs);font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-p{background:var(--purple);color:#fff}.btn-p:hover{background:#6d28d9}.btn-p:disabled{opacity:.5;cursor:not-allowed}
+.btn-o{background:var(--sf);border:1px solid var(--bd);color:var(--mu)}.btn-o:hover{border-color:var(--ps);color:var(--purple)}
+.btn-g{background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7)}.btn-g:hover{border-color:rgba(255,255,255,.35);color:#fff}
+.btn-sm{padding:5px 10px;font-size:11px}.btn-xs{padding:3px 8px;font-size:10px}
+.btn-d{background:var(--rbg);border:1px solid var(--rb);color:var(--red)}.btn-d:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.btn svg{width:12px;height:12px}
+.page{padding:20px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.pt{font-size:18px;font-weight:800;color:var(--tx);letter-spacing:-.3px}
+.ps2{font-size:12px;color:var(--mu);margin-top:2px}
+.view{display:none}.view.active{display:block}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.ch{padding:12px 15px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ct2{font-size:13px;font-weight:700;color:var(--tx)}
+.cb{padding:14px 15px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:14px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.g5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.mb{margin-bottom:14px}
+.b{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.bcr{background:var(--rbg);color:var(--red)}.bhi{background:var(--obg);color:var(--orange)}.bme{background:var(--abg);color:var(--amber)}
+.blo{background:var(--gbg);color:var(--grn)}.bin{background:var(--azbg);color:var(--az)}.bgy{background:var(--sf2);color:var(--mu)}
+.bpu{background:var(--p50);color:var(--purple)}.bte{background:var(--tbg);color:var(--teal)}.bsu{background:var(--gbg);color:var(--grn)}
+.bhuman{background:var(--humanbg);color:var(--human)}.bmach{background:var(--machbg);color:var(--mach)}
+.ct3{display:inline-flex;align-items:center;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:800}
+.ct-aws{background:var(--awsbg);color:#92400e;border:1px solid var(--awsb)}
+.ct-az{background:var(--azbg);color:#1e40af;border:1px solid var(--azb)}
+.ct-gcp{background:var(--gcpbg);color:#1e3a8a;border:1px solid var(--gcpb)}
+.ct-oci{background:var(--ocibg);color:#9f1239;border:1px solid var(--ocib)}
+.stat{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sp::before{background:var(--purple)}.sr::before{background:var(--red)}.sa::before{background:var(--amber)}
+.st::before{background:var(--teal)}.saz::before{background:var(--az)}.sm::before{background:var(--mach)}
+.sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mu)}
+.sv{font-size:24px;font-weight:800;color:var(--tx);margin:4px 0 3px;line-height:1;letter-spacing:-.5px}
+.sc{font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px}
+.si{position:absolute;top:11px;right:11px;width:28px;height:28px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center}
+.si svg{width:13px;height:13px}
+.tw{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse}
+table.t th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);padding:8px 12px;background:var(--sf2);border-bottom:1px solid var(--bd);white-space:nowrap}
+table.t td{padding:8px 12px;font-size:12px;color:var(--tx);border-bottom:1px solid var(--bd);vertical-align:middle}
+table.t tr:last-child td{border-bottom:none}
+table.t tbody tr{cursor:pointer;transition:background .1s}
+table.t tbody tr:hover td{background:var(--sf2)}
+.ic{display:flex;align-items:center;gap:8px}
+.ia{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.ia.mach{border-radius:5px}
+.in2{font-weight:600;font-size:12px}
+.is2{font-size:10px;color:var(--mu)}
+.mono{font-family:var(--mo);font-size:10px;color:var(--mu)}
+/* identity type switcher */
+.itsw{display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;width:fit-content;margin-bottom:14px}
+.itb{padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:none;transition:all .15s;display:flex;align-items:center;gap:6px;color:var(--mu)}
+.itb:hover{background:var(--sf);color:var(--tx)}
+.itb.ah{background:var(--humanbg);color:var(--human)}
+.itb.am{background:var(--machbg);color:var(--mach)}
+.itb svg{width:13px;height:13px}
+/* account cards */
+.ac{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;margin-bottom:9px;transition:box-shadow .2s}
+.ac:hover{box-shadow:0 2px 12px rgba(15,10,46,.07)}
+.ac.sel{border-color:var(--ps);box-shadow:0 0 0 2px rgba(124,106,247,.13)}
+.ach{display:flex;align-items:center;gap:11px;padding:12px 14px;cursor:pointer}
+.alo{width:32px;height:32px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.alo-aws{background:var(--awsbg);color:#92400e;border:1px solid var(--awsb)}
+.alo-az{background:var(--azbg);color:#1e40af;border:1px solid var(--azb)}
+.alo-gcp{background:var(--gcpbg);color:#1e3a8a;border:1px solid var(--gcpb)}
+.alo-oci{background:var(--ocibg);color:#9f1239;border:1px solid var(--ocib)}
+.an{font-size:13px;font-weight:700;color:var(--tx)}
+.ad{font-size:10px;color:var(--mu)}
+.ata{display:flex;align-items:center;gap:5px;margin-left:auto}
+.acb{padding:11px 14px;border-top:1px solid var(--bd);background:var(--sf2)}
+/* account selector chips */
+.acsel{display:flex;align-items:center;gap:7px;margin-bottom:13px;flex-wrap:wrap}
+.ach2{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s}
+.ach2.sel2{border-color:var(--purple);background:var(--p50);color:var(--purple)}
+.ach2.unsel{border-color:var(--bd);background:var(--sf);color:var(--mu)}
+.ach2:hover{border-color:var(--ps)}
+.addbtn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px dashed var(--bd);background:none;color:var(--mu)}
+.addbtn:hover{border-color:var(--purple);color:var(--purple)}
+/* forms */
+.fst{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.fst::after{content:'';flex:1;height:1px;background:var(--p100)}
+.fg{margin-bottom:11px}
+.fl{display:block;font-size:11px;font-weight:700;color:var(--mu);margin-bottom:4px}
+.fl span{color:var(--red)}
+.fc{width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:var(--rs);font-family:var(--fn);font-size:12px;color:var(--tx);background:var(--sf);outline:none;transition:border-color .15s}
+.fc:focus{border-color:var(--ps);box-shadow:0 0 0 3px rgba(124,106,247,.1)}
+.fc-mo{font-family:var(--mo);font-size:11px}
+textarea.fc{resize:vertical;min-height:68px}
+select.fc{cursor:pointer}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.pwe{position:relative}
+.pwe .fc{padding-right:34px}
+.pti{position:absolute;right:9px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--mu)}
+.pti svg{width:13px;height:13px}
+/* tabs */
+.tabs{display:flex;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:13px}
+.tab{flex:1;padding:8px 10px;font-size:11px;font-weight:700;color:var(--mu);cursor:pointer;background:none;border:none;border-right:1px solid var(--bd);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+.tab:last-child{border-right:none}
+.tab:hover{background:var(--sf2);color:var(--tx)}
+.tab.active{background:var(--p50);color:var(--purple)}
+.tc{font-size:9px;font-weight:800;padding:1px 5px;border-radius:20px;background:rgba(124,58,237,.13);color:var(--purple)}
+.tcm{background:rgba(8,145,178,.13);color:var(--mach)}
+/* alerts */
+.al{padding:10px 12px;border-radius:var(--rs);font-size:11px;font-weight:500;border:1px solid;margin-bottom:10px;line-height:1.5}
+.al strong{font-weight:700}
+.alin{background:var(--azbg);border-color:var(--azb);color:#1e3a8a}
+.alwa{background:var(--abg);border-color:var(--ab);color:#78350f}
+.aler{background:var(--rbg);border-color:var(--rb);color:#7f1d1d}
+.alsu{background:var(--gbg);border-color:var(--gbd);color:#14532d}
+.alpu{background:var(--p50);border-color:var(--p100);color:#3b0764}
+.almc{background:var(--machbg);border-color:var(--machb);color:#155e75}
+/* conn status */
+.cs{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:var(--rs);font-size:11px;font-weight:600;border:1px solid}
+.csok{background:var(--gbg);border-color:var(--gbd);color:var(--grn)}
+.cser{background:var(--rbg);border-color:var(--rb);color:var(--red)}
+.cswa{background:var(--abg);border-color:var(--ab);color:var(--amber)}
+.csof{background:var(--sf2);border-color:var(--bd);color:var(--mu)}
+.csd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dok2{background:var(--grn)}.der2{background:var(--red)}.dwa2{background:var(--amber)}.dof2{background:var(--hi)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.dld{background:var(--az);animation:blink 1s infinite}
+/* risk ring */
+.rr{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-size:11px;font-weight:800;border:2px solid;flex-shrink:0}
+.rrcr{border-color:var(--red);color:var(--red);background:var(--rbg)}
+.rrhi{border-color:var(--orange);color:var(--orange);background:var(--obg)}
+.rrme{border-color:var(--amber);color:var(--amber);background:var(--abg)}
+.rrlo{border-color:var(--grn);color:var(--grn);background:var(--gbg)}
+/* machine banner */
+.mbanner{background:linear-gradient(135deg,#0c4a6e 0%,#0891b2 100%);border-radius:var(--r);padding:12px 15px;display:flex;align-items:center;gap:12px;margin-bottom:13px}
+.mbi{width:36px;height:36px;border-radius:var(--rs);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mbi svg{width:18px;height:18px;color:#fff}
+.mbt{font-size:13px;font-weight:800;color:#fff}
+.mbs{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px}
+.mbr{margin-left:auto;display:flex;gap:7px}
+/* risk factor badges */
+.rfb{display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:800;font-family:var(--mo)}
+.rfp{background:#fef3c7;color:#92400e}
+.rfa{background:var(--rbg);color:var(--red)}
+.rfw{background:var(--obg);color:var(--orange)}
+.rfs{background:var(--tbg);color:var(--teal)}
+.rfc{background:var(--p50);color:var(--purple)}
+.rfd{background:var(--sf2);color:var(--mu)}
+/* access chain */
+.chain{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:8px;background:var(--sf2);border-radius:var(--rs);border:1px solid var(--bd);margin-bottom:12px}
+.cn{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:var(--rs);font-size:10px;font-weight:700}
+.cn-vm{background:var(--machbg);color:var(--mach);border:1px solid var(--machb)}
+.cn-role{background:var(--p50);color:var(--purple);border:1px solid var(--p100)}
+.cn-pol{background:var(--abg);color:var(--amber);border:1px solid var(--ab)}
+.cn-res{background:var(--gbg);color:var(--grn);border:1px solid var(--gbd)}
+.ca{color:var(--hi);font-size:12px;font-weight:700}
+/* modal */
+.mbg{position:fixed;inset:0;background:rgba(15,10,46,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.mbg.open{opacity:1;pointer-events:all}
+.modal{background:var(--sf);border-radius:var(--rl);width:540px;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column;transform:scale(.97);transition:transform .2s;box-shadow:0 20px 60px rgba(15,10,46,.2)}
+.mbg.open .modal{transform:scale(1)}
+.mh{padding:18px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sf);z-index:10}
+.mt2{font-size:15px;font-weight:800;color:var(--tx)}
+.mc{width:28px;height:28px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--sf2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--mu)}
+.mc:hover{background:var(--rbg);color:var(--red)}
+.mb2{padding:20px}
+.mf{padding:13px 20px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--sf)}
+/* detail panel */
+.dp{position:fixed;right:0;top:0;bottom:0;width:420px;background:var(--sf);border-left:1px solid var(--bd);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 30px rgba(15,10,46,.1)}
+.dp.open{transform:translateX(0)}
+.dph{padding:15px 17px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sf);z-index:10}
+.dpt{font-size:14px;font-weight:800;color:var(--tx)}
+.dpb{flex:1;overflow-y:auto;padding:15px 17px}
+.dpf{padding:12px 17px;border-top:1px solid var(--bd);display:flex;gap:7px;position:sticky;bottom:0;background:var(--sf)}
+.xcb{width:27px;height:27px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--sf2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--mu)}
+.xcb:hover{background:var(--rbg);color:var(--red)}
+.kv{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--bd);font-size:11px}
+.kv:last-child{border-bottom:none}
+.kk{color:var(--mu);font-weight:600;flex-shrink:0;min-width:100px}
+.kv2{color:var(--tx);font-weight:700;font-family:var(--mo);font-size:10px;text-align:right;word-break:break-all}
+.slbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--hi);margin-bottom:7px;margin-top:12px}
+/* risk detail box */
+.rfbox{padding:9px 11px;border-radius:var(--rs);border:1px solid;margin-bottom:7px}
+.rfcr{background:var(--rbg);border-color:var(--rb)}
+.rfhi{background:var(--obg);border-color:#fed7aa}
+.rfme{background:var(--abg);border-color:var(--ab)}
+.rftitle{font-size:11px;font-weight:700;color:var(--tx)}
+.rfdesc{font-size:10px;color:var(--mu);margin-top:2px;line-height:1.4}
+/* ag banner */
+.ag{background:linear-gradient(135deg,#1c0f48 0%,#3d2480 100%);border-radius:var(--r);padding:12px 15px;display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.agi{width:36px;height:36px;border-radius:var(--rs);background:rgba(124,106,247,.28);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.agi svg{width:17px;height:17px;color:#a78bfa}
+.agt{font-size:13px;font-weight:800;color:#fff}
+.ags{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+.agr{margin-left:auto;display:flex;gap:7px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ld{width:6px;height:6px;border-radius:50%;background:#86efac;display:inline-block;margin-left:6px;animation:pulse 2s infinite;vertical-align:middle}
+/* code */
+.code{background:#0f0a2e;color:#c4b5fd;font-family:var(--mo);font-size:10px;padding:11px;border-radius:var(--rs);overflow-x:auto;line-height:1.6;white-space:pre}
+/* search + toolbar */
+.sw{position:relative;flex:1;max-width:260px}
+.sw svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:12px;height:12px;color:var(--hi);pointer-events:none}
+.si2{width:100%;padding:6px 8px 6px 28px;border:1px solid var(--bd);border-radius:var(--rs);font-family:var(--fn);font-size:12px;color:var(--tx);background:var(--sf);outline:none}
+.si2:focus{border-color:var(--ps)}
+.toolbar{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+/* loading / empty */
+.lr{display:flex;align-items:center;justify-content:center;padding:28px;color:var(--mu);font-size:12px;gap:9px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sp2{width:16px;height:16px;border:2px solid var(--bd);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite}
+.es{text-align:center;padding:28px;color:var(--mu)}
+.es svg{width:30px;height:30px;opacity:.22;margin:0 auto 7px;display:block}
+.es p{font-size:11px}
+/* toasts */
+.toasts{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--navy);color:#fff;padding:10px 14px;border-radius:var(--r);font-size:11px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 18px rgba(15,10,46,.28);max-width:340px}
+@keyframes su{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast{animation:su .2s ease}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo"><div class="lm"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2L14 5.5V10.5L8 14L2 10.5V5.5L8 2Z" fill="white" opacity=".9"/><circle cx="8" cy="8" r="2.5" fill="white"/></svg></div><div><div class="lt">anugal</div><div class="ls">CIEM v2</div></div></div>
+  <div class="ns">Platform</div>
+  <button class="ni active" onclick="nav('overview',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/><rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/></svg>Overview</button>
+  <button class="ni" onclick="nav('accounts',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Account Registry<span id="total-n" class="acn">0</span></button>
+  <div class="ns">Cloud Providers</div>
+  <button class="cni" onclick="nav('aws',this)"><span class="cbadge" style="background:var(--awsbg);color:#92400e">AWS</span>Amazon Web Services<span class="acn" id="aws-n">0</span><span class="dot dof" id="dot-aws" style="margin-left:4px"></span></button>
+  <button class="cni" onclick="nav('azure',this)"><span class="cbadge" style="background:var(--azbg);color:#1e40af">AZ</span>Microsoft Azure<span class="acn" id="az-n">0</span><span class="dot dof" id="dot-az" style="margin-left:4px"></span></button>
+  <button class="cni" onclick="nav('gcp',this)"><span class="cbadge" style="background:var(--gcpbg);color:#1e3a8a">GCP</span>Google Cloud<span class="acn" id="gcp-n">0</span><span class="dot dof" id="dot-gcp" style="margin-left:4px"></span></button>
+  <button class="cni" onclick="nav('oci',this)"><span class="cbadge" style="background:var(--ocibg);color:#9f1239">OCI</span>Oracle Cloud<span class="acn" id="oci-n">0</span><span class="dot dof" id="dot-oci" style="margin-left:4px"></span></button>
+  <div class="ns">Analysis</div>
+  <button class="ni" onclick="nav('risk',this)"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2L14 13H2L8 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Risk Analysis<span id="risk-n" class="acn" style="background:rgba(220,38,38,.2);color:#fca5a5">0</span></button>
+  <div class="sf"><div class="ur"><div class="av">VK</div><div><div class="un">Vicky K.</div><div class="uro">Product Owner · BCS</div></div></div></div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="bc"><span>Anugal CIEM</span><svg viewBox="0 0 10 10" fill="none"><path d="M3 2l4 3-4 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><strong id="bc-t">Overview</strong></div>
+    <div id="bc-cloud" style="margin-left:4px"></div>
+    <div class="tr">
+      <span id="last-ref" style="font-size:10px;color:var(--hi)"></span>
+      <button class="btn btn-o btn-sm" onclick="refreshAll()"><svg viewBox="0 0 14 14" fill="none"><path d="M12 7a5 5 0 11-1.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 2v3h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Refresh All</button>
+      <button class="btn btn-p btn-sm" onclick="nav('accounts',null);openAddAcct()"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>Add Account</button>
+    </div>
+  </div>
+  <div class="page">
+
+  <!-- OVERVIEW -->
+  <div id="v-overview" class="view active">
+    <div class="ph"><div><div class="pt">CIEM Overview</div><div class="ps2">Multi-account · Human &amp; Machine Identity posture</div></div><div style="display:flex;gap:7px"><button class="btn btn-o btn-sm" onclick="computeRisk();nav('risk',null)">Analyse Risk</button><button class="btn btn-o btn-sm" onclick="exportAll()">Export All</button></div></div>
+    <div class="ag"><div class="agi"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2L17 5.5V10.5C17 14.5 13.5 17.5 10 18C6.5 17.5 3 14.5 3 10.5V5.5L10 2Z" fill="currentColor" opacity=".3"/><circle cx="10" cy="10" r="2.5" fill="currentColor"/><path d="M10 5v2M10 13v2M5 10H7M13 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div><div class="agt">Agentic CIEM Engine<span class="ld"></span></div><div class="ags" id="ag-status">Add accounts to begin scanning</div></div><div class="agr"><button class="btn btn-g btn-sm" onclick="nav('accounts',null)">Manage Accounts</button><button class="btn btn-sm" style="background:var(--ps);color:#fff" onclick="refreshAll()">Scan All</button></div></div>
+    <div class="g5 mb">
+      <div class="stat sp"><div class="sl">Total Accounts</div><div class="sv" id="ov-accts">0</div><span class="sc bgy">across 4 clouds</span></div>
+      <div class="stat sp"><div class="sl">Human Identities</div><div class="sv" id="ov-human">—</div><span class="sc bhuman">human</span></div>
+      <div class="stat sm"><div class="sl">Machine Identities</div><div class="sv" id="ov-mach">—</div><span class="sc bmach">machine</span></div>
+      <div class="stat sr"><div class="sl">Critical Risk</div><div class="sv" id="ov-crit">—</div><span class="sc bcr" id="ov-crit-s">0 findings</span></div>
+      <div class="stat sa"><div class="sl">Overprivileged</div><div class="sv" id="ov-overp">—</div><span class="sc bme">needs review</span></div>
+    </div>
+    <div class="g2" id="ov-grid">
+      <div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:7px"><span class="ct3 ct-aws">AWS</span><span class="ct2">Amazon Web Services</span></div><span class="b bgy" id="ov-aws-s">0 accounts</span></div><div class="cb" id="ov-aws-b"><div class="es"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5"/></svg><p>No AWS accounts configured</p></div></div></div>
+      <div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:7px"><span class="ct3 ct-az">AZ</span><span class="ct2">Microsoft Azure</span></div><span class="b bgy" id="ov-az-s">0 accounts</span></div><div class="cb" id="ov-az-b"><div class="es"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5"/></svg><p>No Azure accounts configured</p></div></div></div>
+      <div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:7px"><span class="ct3 ct-gcp">GCP</span><span class="ct2">Google Cloud Platform</span></div><span class="b bgy" id="ov-gcp-s">0 accounts</span></div><div class="cb" id="ov-gcp-b"><div class="es"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5"/></svg><p>No GCP projects configured</p></div></div></div>
+      <div class="card"><div class="ch"><div style="display:flex;align-items:center;gap:7px"><span class="ct3 ct-oci">OCI</span><span class="ct2">Oracle Cloud Infrastructure</span></div><span class="b bgy" id="ov-oci-s">0 accounts</span></div><div class="cb" id="ov-oci-b"><div class="es"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5"/></svg><p>No OCI tenancies configured</p></div></div></div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT REGISTRY -->
+  <div id="v-accounts" class="view">
+    <div class="ph"><div><div class="pt">Account Registry</div><div class="ps2">Multi-account credentials for all cloud providers — stored in browser localStorage</div></div><div style="display:flex;gap:7px"><button class="btn btn-o btn-sm" onclick="clearAll()">Clear All</button><button class="btn btn-p btn-sm" onclick="openAddAcct()"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>Add Account</button></div></div>
+    <div class="al alin mb">Credentials stored locally in <strong>localStorage</strong> — never transmitted. Tokens expire; re-paste when needed. Each account can hold human and machine identity data independently.</div>
+    <div class="g2">
+      <div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><h3 style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px"><span class="ct3 ct-aws">AWS</span>Accounts</h3><button class="btn btn-o btn-xs" onclick="openAddAcct('aws')">+ Add AWS</button></div><div id="aws-list"><div class="es"><p>No AWS accounts</p></div></div></div>
+      <div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><h3 style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px"><span class="ct3 ct-az">AZ</span>Subscriptions</h3><button class="btn btn-o btn-xs" onclick="openAddAcct('azure')">+ Add Azure</button></div><div id="az-list"><div class="es"><p>No Azure subscriptions</p></div></div></div>
+      <div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><h3 style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px"><span class="ct3 ct-gcp">GCP</span>Projects</h3><button class="btn btn-o btn-xs" onclick="openAddAcct('gcp')">+ Add GCP</button></div><div id="gcp-list"><div class="es"><p>No GCP projects</p></div></div></div>
+      <div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><h3 style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px"><span class="ct3 ct-oci">OCI</span>Tenancies</h3><button class="btn btn-o btn-xs" onclick="openAddAcct('oci')">+ Add OCI</button></div><div id="oci-list"><div class="es"><p>No OCI tenancies</p></div></div></div>
+    </div>
+  </div>
+
+  <!-- AMAZON WEB SERVICES — IAM PAGE -->
+  <div id="v-aws" class="view">
+    <div class="ph">
+      <div style="display:flex;align-items:center;gap:11px">
+        <div class="alo alo-aws" style="width:38px;height:38px;font-size:13px">AWS</div>
+        <div><div class="pt">Amazon Web Services — IAM</div><div class="ps2" id="aws-sub">Select an account below</div></div>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <div id="aws-cs" class="cs csof"><div class="csd dof2"></div>No account selected</div>
+        <button class="btn btn-o btn-sm" onclick="fetchCloud('aws','machine')" style="color:var(--mach);border-color:var(--machb)">Pull Machine Data</button>
+        <button class="btn btn-p btn-sm" onclick="fetchCloud('aws')">Pull Human Data</button>
+      </div>
+    </div>
+    <div class="acsel" id="aws-acsel"><button class="addbtn" onclick="openAddAcct('aws')">+ Add Account</button></div>
+    <div class="itsw">
+      <button class="itb ah" id="aws-ith" onclick="setIT('aws','human')"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Human Identities</button>
+      <button class="itb" id="aws-itm" onclick="setIT('aws','machine')"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h2M8 7h2M5 10v2M9 10v2M3 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Machine Identities</button>
+    </div>
+    <div id="aws-hsec">
+      
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('aws','users',this)">IAM Users<span class="tc" id="tc-aws-u">0</span></button>
+        <button class="tab" onclick="swTab('aws','roles',this)">IAM Roles<span class="tc" id="tc-aws-r">0</span></button>
+        <button class="tab" onclick="swTab('aws','policies',this)">Policies<span class="tc" id="tc-aws-p">0</span></button>
+        <button class="tab" onclick="swTab('aws','groups',this)">Groups<span class="tc" id="tc-aws-g">0</span></button>
+        <button class="tab" onclick="swTab('aws','credrep',this)">Credential Report</button>
+      </div>
+      <div id="aws-tb-users"><div class="toolbar"><div class="sw"><svg viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M9 9l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input class="si2" placeholder="Search users..." oninput="srch('tb-aws-users-data',this.value,'tb-aws-u-tbody',renderAWSUsersRows)"/></div><button class="btn btn-o btn-sm" onclick="exportD('aws-users','aws_users.json')">Export JSON</button></div><div class="card"><div class="tw"><table class="t"><thead><tr><th>User</th><th>ARN</th><th>Created</th><th>Pwd Last Used</th><th>MFA</th><th>Risk Score</th><th>Account</th></tr></thead><tbody id="tb-aws-u-tbody"><tr><td colspan="7"><div class="lr"><div class="sp2"></div>Select an account and pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="aws-tb-roles" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Role Name</th><th>ARN</th><th>Created</th><th>Max Session</th><th>Description</th><th>Risk</th><th>Account</th></tr></thead><tbody id="tb-aws-r-tbody"><tr><td colspan="7"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="aws-tb-policies" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Policy</th><th>ARN</th><th>Attachments</th><th>Updated</th><th>Account</th></tr></thead><tbody id="tb-aws-p-tbody"><tr><td colspan="5"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="aws-tb-groups" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Group</th><th>ARN</th><th>Path</th><th>Created</th><th>Account</th></tr></thead><tbody id="tb-aws-g-tbody"><tr><td colspan="5"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="aws-tb-credrep" style="display:none"><div class="al alpu mb">Credential report: MFA status, key activity and password last-used for every user.</div><div class="card"><div class="tw"><table class="t"><thead><tr><th>User</th><th>MFA</th><th>Pwd Last Used</th><th>Key 1 Active</th><th>Key 1 Last Used</th><th>Key 2 Active</th><th>Key 2 Last Used</th><th>Account</th></tr></thead><tbody id="tb-aws-cr-tbody"><tr><td colspan="8"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+    <div id="aws-msec" style="display:none">
+      
+      <div class="mbanner"><div class="mbi"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="10" rx="2" stroke="white" stroke-width="1.5"/><path d="M6 9h3M11 9h3M7 12v2M13 12v2M5 14h10" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div><div><div class="mbt">AWS Machine Identities — EC2, Lambda &amp; Instance Profiles</div><div class="mbs">EC2 Instances → Instance Profile → IAM Role → Policies → Resources · Lambda → Execution Role → Services</div></div></div>
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('aws-m','ec2',this)">EC2 Instances<span class="tc tcm" id="tc-aws-ec2">0</span></button>
+        <button class="tab" onclick="swTab('aws-m','lambda',this)">Lambda Functions<span class="tc tcm" id="tc-aws-lmb">0</span></button>
+        <button class="tab" onclick="swTab('aws-m','ip',this)">Instance Profiles<span class="tc tcm" id="tc-aws-ip">0</span></button>
+      </div>
+      <div id="aws-m-tb-ec2"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Instance</th><th>Type</th><th>State</th><th>Public IP</th><th>IAM Profile / Role</th><th>Risk Factors</th><th>Risk Score</th><th>Account</th></tr></thead><tbody id="tb-aws-ec2-tbody"><tr><td colspan="8"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+      <div id="aws-m-tb-lambda" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Function</th><th>Runtime</th><th>Execution Role</th><th>Last Modified</th><th>Risk Factors</th><th>Risk Score</th><th>Account</th></tr></thead><tbody id="tb-aws-lmb-tbody"><tr><td colspan="7"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+      <div id="aws-m-tb-ip" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Profile Name</th><th>ARN</th><th>Attached Roles</th><th>Created</th><th>Risk</th><th>Account</th></tr></thead><tbody id="tb-aws-ip-tbody"><tr><td colspan="6"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+  </div>
+
+  <!-- MICROSOFT AZURE — IAM PAGE -->
+  <div id="v-azure" class="view">
+    <div class="ph">
+      <div style="display:flex;align-items:center;gap:11px">
+        <div class="alo alo-az" style="width:38px;height:38px;font-size:13px">AZ</div>
+        <div><div class="pt">Microsoft Azure — IAM</div><div class="ps2" id="az-sub">Select an account below</div></div>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <div id="az-cs" class="cs csof"><div class="csd dof2"></div>No account selected</div>
+        <button class="btn btn-o btn-sm" onclick="fetchCloud('azure','machine')" style="color:var(--mach);border-color:var(--machb)">Pull Machine Data</button>
+        <button class="btn btn-p btn-sm" onclick="fetchCloud('azure')">Pull Human Data</button>
+      </div>
+    </div>
+    <div class="acsel" id="az-acsel"><button class="addbtn" onclick="openAddAcct('azure')">+ Add Account</button></div>
+    <div class="itsw">
+      <button class="itb ah" id="az-ith" onclick="setIT('azure','human')"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Human Identities</button>
+      <button class="itb" id="az-itm" onclick="setIT('azure','machine')"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h2M8 7h2M5 10v2M9 10v2M3 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Machine Identities</button>
+    </div>
+    <div id="az-hsec">
+      
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('az','users',this)">AD Users<span class="tc" id="tc-az-u">0</span></button>
+        <button class="tab" onclick="swTab('az','sps',this)">Service Principals<span class="tc" id="tc-az-sp">0</span></button>
+        <button class="tab" onclick="swTab('az','roles',this)">Role Assignments<span class="tc" id="tc-az-r">0</span></button>
+        <button class="tab" onclick="swTab('az','groups',this)">Groups<span class="tc" id="tc-az-g">0</span></button>
+      </div>
+      <div id="az-tb-users"><div class="card"><div class="tw"><table class="t"><thead><tr><th>User</th><th>UPN</th><th>Status</th><th>Title / Dept</th><th>Last Sign-In</th><th>Risk</th><th>Account</th></tr></thead><tbody id="tb-az-u-tbody"><tr><td colspan="7"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="az-tb-sps" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Service Principal</th><th>App ID</th><th>Type</th><th>Enabled</th><th>Risk</th><th>Account</th></tr></thead><tbody id="tb-az-sp-tbody"><tr><td colspan="6"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="az-tb-roles" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Principal ID</th><th>Role</th><th>Scope</th><th>Type</th><th>Risk</th><th>Account</th></tr></thead><tbody id="tb-az-r-tbody"><tr><td colspan="6"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="az-tb-groups" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Group</th><th>ID</th><th>Mail</th><th>Security</th><th>Account</th></tr></thead><tbody id="tb-az-g-tbody"><tr><td colspan="5"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+    <div id="az-msec" style="display:none">
+      
+      <div class="mbanner"><div class="mbi"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="10" rx="2" stroke="white" stroke-width="1.5"/><path d="M6 9h3M11 9h3M7 12v2M13 12v2M5 14h10" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div><div><div class="mbt">Azure Machine Identities — VMs &amp; Managed Identities</div><div class="mbs">VM → System/User Assigned Managed Identity → Role Assignments → Azure Resources</div></div></div>
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('az-m','vms',this)">Virtual Machines<span class="tc tcm" id="tc-az-vm">0</span></button>
+        <button class="tab" onclick="swTab('az-m','mi',this)">Managed Identities<span class="tc tcm" id="tc-az-mi">0</span></button>
+      </div>
+      <div id="az-m-tb-vms"><div class="card"><div class="tw"><table class="t"><thead><tr><th>VM</th><th>Size</th><th>OS</th><th>State</th><th>Managed Identity</th><th>MI Type</th><th>Risk Factors</th><th>Score</th><th>Account</th></tr></thead><tbody id="tb-az-vm-tbody"><tr><td colspan="9"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+      <div id="az-m-tb-mi" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Managed Identity</th><th>Type</th><th>Client ID</th><th>Principal ID</th><th>Resource Group</th><th>Risk</th><th>Account</th></tr></thead><tbody id="tb-az-mi-tbody"><tr><td colspan="7"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+  </div>
+
+  <!-- GOOGLE CLOUD PLATFORM — IAM PAGE -->
+  <div id="v-gcp" class="view">
+    <div class="ph">
+      <div style="display:flex;align-items:center;gap:11px">
+        <div class="alo alo-gcp" style="width:38px;height:38px;font-size:13px">GCP</div>
+        <div><div class="pt">Google Cloud Platform — IAM</div><div class="ps2" id="gcp-sub">Select an account below</div></div>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <div id="gcp-cs" class="cs csof"><div class="csd dof2"></div>No account selected</div>
+        <button class="btn btn-o btn-sm" onclick="fetchCloud('gcp','machine')" style="color:var(--mach);border-color:var(--machb)">Pull Machine Data</button>
+        <button class="btn btn-p btn-sm" onclick="fetchCloud('gcp')">Pull Human Data</button>
+      </div>
+    </div>
+    <div class="acsel" id="gcp-acsel"><button class="addbtn" onclick="openAddAcct('gcp')">+ Add Account</button></div>
+    <div class="itsw">
+      <button class="itb ah" id="gcp-ith" onclick="setIT('gcp','human')"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Human Identities</button>
+      <button class="itb" id="gcp-itm" onclick="setIT('gcp','machine')"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h2M8 7h2M5 10v2M9 10v2M3 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Machine Identities</button>
+    </div>
+    <div id="gcp-hsec">
+      
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('gcp','sa',this)">Service Accounts<span class="tc" id="tc-gcp-sa">0</span></button>
+        <button class="tab" onclick="swTab('gcp','bindings',this)">IAM Bindings<span class="tc" id="tc-gcp-b">0</span></button>
+        <button class="tab" onclick="swTab('gcp','roles',this)">Custom Roles<span class="tc" id="tc-gcp-r">0</span></button>
+      </div>
+      <div id="gcp-tb-sa"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Service Account</th><th>Email</th><th>Disabled</th><th>Risk</th><th>Project</th></tr></thead><tbody id="tb-gcp-sa-tbody"><tr><td colspan="5"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="gcp-tb-bindings" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Role</th><th>Members (sample)</th><th>Count</th><th>Risk</th><th>Project</th></tr></thead><tbody id="tb-gcp-b-tbody"><tr><td colspan="5"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="gcp-tb-roles" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Role</th><th>Title</th><th>Stage</th><th>Permissions</th><th>Project</th></tr></thead><tbody id="tb-gcp-r-tbody"><tr><td colspan="5"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+    <div id="gcp-msec" style="display:none">
+      
+      <div class="mbanner"><div class="mbi"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="10" rx="2" stroke="white" stroke-width="1.5"/><path d="M6 9h3M11 9h3M7 12v2M13 12v2M5 14h10" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div><div><div class="mbt">GCP Machine Identities — Compute Engine Instances</div><div class="mbs">VM Instance → Service Account → IAM Roles → Permissions → Cloud Resources</div></div></div>
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('gcp-m','instances',this)">Compute Instances<span class="tc tcm" id="tc-gcp-vm">0</span></button>
+      </div>
+      <div id="gcp-m-tb-instances"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Instance</th><th>Zone</th><th>Machine Type</th><th>Status</th><th>Service Account</th><th>Public IP</th><th>Risk Factors</th><th>Score</th><th>Project</th></tr></thead><tbody id="tb-gcp-vm-tbody"><tr><td colspan="9"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+  </div>
+
+  <!-- ORACLE CLOUD INFRASTRUCTURE — IAM PAGE -->
+  <div id="v-oci" class="view">
+    <div class="ph">
+      <div style="display:flex;align-items:center;gap:11px">
+        <div class="alo alo-oci" style="width:38px;height:38px;font-size:13px">OCI</div>
+        <div><div class="pt">Oracle Cloud Infrastructure — IAM</div><div class="ps2" id="oci-sub">Select an account below</div></div>
+      </div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <div id="oci-cs" class="cs csof"><div class="csd dof2"></div>No account selected</div>
+        <button class="btn btn-o btn-sm" onclick="fetchCloud('oci','machine')" style="color:var(--mach);border-color:var(--machb)">Pull Machine Data</button>
+        <button class="btn btn-p btn-sm" onclick="fetchCloud('oci')">Pull Human Data</button>
+      </div>
+    </div>
+    <div class="acsel" id="oci-acsel"><button class="addbtn" onclick="openAddAcct('oci')">+ Add Account</button></div>
+    <div class="itsw">
+      <button class="itb ah" id="oci-ith" onclick="setIT('oci','human')"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Human Identities</button>
+      <button class="itb" id="oci-itm" onclick="setIT('oci','machine')"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 7h2M8 7h2M5 10v2M9 10v2M3 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Machine Identities</button>
+    </div>
+    <div id="oci-hsec">
+      
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('oci','users',this)">Users<span class="tc" id="tc-oci-u">0</span></button>
+        <button class="tab" onclick="swTab('oci','groups',this)">Groups<span class="tc" id="tc-oci-g">0</span></button>
+        <button class="tab" onclick="swTab('oci','policies',this)">Policies<span class="tc" id="tc-oci-p">0</span></button>
+        <button class="tab" onclick="swTab('oci','compartments',this)">Compartments<span class="tc" id="tc-oci-c">0</span></button>
+      </div>
+      <div id="oci-tb-users"><div class="card"><div class="tw"><table class="t"><thead><tr><th>User</th><th>Email</th><th>Status</th><th>MFA</th><th>Created</th><th>Risk</th><th>Tenancy</th></tr></thead><tbody id="tb-oci-u-tbody"><tr><td colspan="7"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="oci-tb-groups" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Group</th><th>Description</th><th>State</th><th>Created</th><th>Tenancy</th></tr></thead><tbody id="tb-oci-g-tbody"><tr><td colspan="5"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="oci-tb-policies" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Policy</th><th>Statements</th><th>Compartment</th><th>Created</th><th>Risk</th><th>Tenancy</th></tr></thead><tbody id="tb-oci-p-tbody"><tr><td colspan="6"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+      <div id="oci-tb-compartments" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Compartment</th><th>Description</th><th>OCID</th><th>State</th><th>Created</th><th>Tenancy</th></tr></thead><tbody id="tb-oci-c-tbody"><tr><td colspan="6"><div class="lr"><div class="sp2"></div>Pull data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+    <div id="oci-msec" style="display:none">
+      
+      <div class="mbanner"><div class="mbi"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="10" rx="2" stroke="white" stroke-width="1.5"/><path d="M6 9h3M11 9h3M7 12v2M13 12v2M5 14h10" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg></div><div><div class="mbt">OCI Machine Identities — Compute Instances &amp; Dynamic Groups</div><div class="mbs">OCI Instance → Dynamic Group (matching rule) → Policy → Resource Permissions</div></div></div>
+      <div class="tabs">
+        <button class="tab active" onclick="swTab('oci-m','instances',this)">Compute Instances<span class="tc tcm" id="tc-oci-vm">0</span></button>
+        <button class="tab" onclick="swTab('oci-m','dyngroups',this)">Dynamic Groups<span class="tc tcm" id="tc-oci-dg">0</span></button>
+      </div>
+      <div id="oci-m-tb-instances"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Instance</th><th>Shape</th><th>State</th><th>Dynamic Group</th><th>Public IP</th><th>Risk Factors</th><th>Score</th><th>Tenancy</th></tr></thead><tbody id="tb-oci-vm-tbody"><tr><td colspan="8"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+      <div id="oci-m-tb-dyngroups" style="display:none"><div class="card"><div class="tw"><table class="t"><thead><tr><th>Dynamic Group</th><th>Matching Rule</th><th>Description</th><th>State</th><th>Risk</th><th>Tenancy</th></tr></thead><tbody id="tb-oci-dg-tbody"><tr><td colspan="6"><div class="lr"><div class="sp2"></div>Pull machine data</div></td></tr></tbody></table></div></div></div>
+
+    </div>
+  </div>
+
+  <!-- RISK -->
+  <div id="v-risk" class="view">
+    <div class="ph"><div><div class="pt">Risk Analysis</div><div class="ps2">Cross-account findings — Human Identity &amp; Machine Identity risks unified</div></div><button class="btn btn-p btn-sm" onclick="computeRisk()">Re-compute</button></div>
+    <div id="risk-body"><div class="es" style="padding:50px"><svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5"/></svg><p>Pull data from cloud providers first</p></div></div>
+  </div>
+
+  </div><!-- /page -->
+</main>
+
+<!-- ADD ACCOUNT MODAL -->
+<div class="mbg" id="add-modal">
+  <div class="modal">
+    <div class="mh"><div id="modal-title" class="mt2">Add Account</div><button class="mc" onclick="closeModal()">&#x2715;</button></div>
+    <div class="mb2" id="modal-body"></div>
+    <div class="mf"><button class="btn btn-o btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-o btn-sm" onclick="testConn()">Test Connection</button><button class="btn btn-p btn-sm" onclick="saveAcct()">Save Account</button></div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="dp" id="dp">
+  <div class="dph"><div id="dp-title" class="dpt">Detail</div><button class="xcb" onclick="closeDP()">&#x2715;</button></div>
+  <div class="dpb" id="dp-body"></div>
+  <div class="dpf" id="dp-foot"></div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ═══ STATE ═══
+const S={accounts:{aws:[],azure:[],gcp:[],oci:[]},selected:{aws:null,azure:null,gcp:null,oci:null},idType:{aws:'human',azure:'human',gcp:'human',oci:'human'},data:{},findings:[]};
+let editId=null,modalProv=null;
+
+window.addEventListener('DOMContentLoaded',()=>{loadState();renderAllLists();updateDots();refreshOv();});
+
+// ═══ NAVIGATION ═══
+const PT={overview:'Overview',accounts:'Account Registry',aws:'AWS IAM',azure:'Azure IAM',gcp:'GCP IAM',oci:'OCI IAM',risk:'Risk Analysis'};
+const CH={aws:'<span class="ct3 ct-aws">AWS</span>',azure:'<span class="ct3 ct-az">AZ</span>',gcp:'<span class="ct3 ct-gcp">GCP</span>',oci:'<span class="ct3 ct-oci">OCI</span>'};
+function nav(page,btn){
+  document.querySelectorAll('.view.active').forEach(v=>{if(v.closest('.page'))v.classList.remove('active');});
+  const el=document.getElementById('v-'+page);if(el)el.classList.add('active');
+  document.querySelectorAll('.ni,.cni').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('bc-t').textContent=PT[page]||page;
+  document.getElementById('bc-cloud').innerHTML=CH[page]||'';
+  if(['aws','azure','gcp','oci'].includes(page))renderAcctSel(page);
+}
+function swTab(pfx,tab,btn){
+  document.querySelectorAll(`[id^="${pfx}-tb-"]`).forEach(e=>{e.style.display='none';e.classList.remove('active');});
+  const t=document.getElementById(`${pfx}-tb-${tab}`);if(t){t.style.display='block';t.classList.add('active');}
+  const tc=btn?.closest('.tabs');if(tc)tc.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+// ═══ HELPERS ═══
+const uid=()=>Math.random().toString(36).slice(2,10);
+const v=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+const sv=(id,val)=>{const e=document.getElementById(id);if(e&&val!=null)e.value=val;};
+const trunc=(s,n=40)=>!s?'—':s.length>n?s.slice(0,n)+'…':s;
+const fmtD=s=>{if(!s)return'—';try{return new Date(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch{return s;}};
+const fmtDT=s=>{if(!s)return'—';try{return new Date(s).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'})}catch{return s;}};
+const xmlV=(n,t)=>{const e=n.getElementsByTagName(t)[0];return e?e.textContent:'';};
+const xmlNs=(d,t)=>Array.from(d.getElementsByTagName(t));
+const ek=str=>str.replace(/"/g,'&quot;');
+
+function toast(msg,type='info'){
+  const c=document.getElementById('toasts');const d=document.createElement('div');d.className='toast';
+  const col={success:'#86efac',error:'#fca5a5',warn:'#fcd34d',info:'#93c5fd'};
+  d.innerHTML=`<span style="color:${col[type]||col.info}">&#9679;</span> ${msg}`;
+  c.appendChild(d);setTimeout(()=>d.remove(),4000);
+}
+function boolB(v,g=true){
+  if(v===true||v==='true')return g?'<span class="b bsu">Yes</span>':'<span class="b bcr">Yes</span>';
+  if(v===false||v==='false')return g?'<span class="b bcr">No</span>':'<span class="b bsu">No</span>';
+  return '<span class="b bgy">—</span>';
+}
+function rs(f){
+  let s=0;
+  if(f.root)s+=40;if(f.noMFA)s+=30;if(f.admin)s+=25;if(f.wildcard)s+=20;
+  if(f.pubIP&&f.machRole)s+=20;if(f.pubIP)s+=8;if(f.dormant)s+=15;
+  if(f.machAdmin)s+=30;if(f.machWild)s+=25;if(f.defaultSA)s+=15;if(f.stale)s+=8;
+  return Math.min(s,100);
+}
+function rl(s){return s>=70?'cr':s>=45?'hi':s>=20?'me':'lo';}
+function rlLbl(l){return{cr:'Critical',hi:'High',me:'Medium',lo:'Low'}[l]||'Low';}
+function rring(s){const l=rl(s);return `<div class="rr rr${l}">${s}</div>`;}
+function rbadge(s){const l=rl(s);const c={cr:'bcr',hi:'bhi',me:'bme',lo:'blo'}[l];return `<span class="b ${c}">${rlLbl(l)}</span>`;}
+function abadge(acct){return acct?`<span class="b bgy" style="font-size:9px">${trunc(acct.name,18)}</span>`:'—';}
+function rfbadges(f){
+  const t=[];
+  if(f.pubIP)t.push('<span class="rfb rfp">PUB-IP</span>');
+  if(f.machAdmin||f.admin)t.push('<span class="rfb rfa">ADMIN-ROLE</span>');
+  if(f.machWild||f.wildcard)t.push('<span class="rfb rfw">WILDCARD</span>');
+  if(f.noMFA)t.push('<span class="rfb rfa">NO-MFA</span>');
+  if(f.defaultSA)t.push('<span class="rfb rfw">DEFAULT-SA</span>');
+  if(f.stale)t.push('<span class="rfb rfs">STALE</span>');
+  if(f.dormant)t.push('<span class="rfb rfs">DORMANT</span>');
+  return t.join(' ')||'<span class="b blo">Clean</span>';
+}
+function setCS(key,state,msg){
+  const el=document.getElementById(key+'-cs');if(!el)return;
+  const cls={ok:'csok',err:'cser',warn:'cswa',off:'csof',loading:'cswa'};
+  const dc={ok:'dok2',err:'der2',warn:'dwa2',off:'dof2',loading:'dld'};
+  el.className='cs '+cls[state];
+  el.innerHTML=`<div class="csd ${dc[state]}"></div>${msg}`;
+}
+function setEmpty(id,cols,msg='No data'){const e=document.getElementById(id);if(e)e.innerHTML=`<tr><td colspan="${cols}"><div class="es"><p>${msg}</p></div></td></tr>`;}
+function setLoading(id,cols){const e=document.getElementById(id);if(e)e.innerHTML=`<tr><td colspan="${cols}"><div class="lr"><div class="sp2"></div>Loading…</div></td></tr>`;}
+
+// ═══ PERSIST ═══
+function saveState(){localStorage.setItem('anugal_ciem_v2',JSON.stringify({accounts:S.accounts}));}
+function loadState(){
+  try{const d=JSON.parse(localStorage.getItem('anugal_ciem_v2')||'{}');if(d.accounts)S.accounts=d.accounts;}catch(e){}
+  updateCounts();
+}
+function updateCounts(){
+  const tot=Object.values(S.accounts).flat().length;
+  document.getElementById('total-n').textContent=tot;
+  document.getElementById('aws-n').textContent=S.accounts.aws.length;
+  document.getElementById('az-n').textContent=S.accounts.azure.length;
+  document.getElementById('gcp-n').textContent=S.accounts.gcp.length;
+  document.getElementById('oci-n').textContent=S.accounts.oci.length;
+}
+function updateDots(){
+  ['aws','azure','gcp','oci'].forEach(p=>{
+    const key=p==='azure'?'az':p;
+    const dot=document.getElementById('dot-'+key);if(!dot)return;
+    const hasA=S.accounts[p].length>0;
+    const hasD=S.accounts[p].some(a=>S.data[a.id]&&Object.keys(S.data[a.id]).length>0);
+    dot.className='dot '+(hasD?'dok':hasA?'dwa':'dof');
+  });
+}
+
+// ═══ ACCOUNT LISTS ═══
+function renderAllLists(){['aws','azure','gcp','oci'].forEach(p=>renderList(p));updateCounts();}
+function renderList(p){
+  const key=p==='azure'?'az':p;
+  const el=document.getElementById(key+'-list');if(!el)return;
+  const accts=S.accounts[p]||[];
+  if(!accts.length){el.innerHTML=`<div class="es"><p>No ${p} accounts</p></div>`;return;}
+  el.innerHTML=accts.map(a=>{
+    const hd=!!(S.data[a.id]&&Object.keys(S.data[a.id]).length);
+    const sel=S.selected[p]===a.id;
+    return `<div class="ac${sel?' sel':''}">
+      <div class="ach" onclick="selAcct('${p}','${a.id}')">
+        <div class="alo alo-${p==='azure'?'az':p}">${p==='azure'?'AZ':p.toUpperCase()}</div>
+        <div><div class="an">${a.name}</div><div class="ad">${acctDesc(p,a)}</div></div>
+        <div class="ata">${hd?'<span class="b bsu">Data pulled</span>':'<span class="b bme">No data</span>'}${sel?'<span class="b bpu" style="margin-left:4px">Active</span>':''}</div>
+      </div>
+      <div class="acb"><div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-o btn-xs" onclick="selAndFetch('${p}','${a.id}')">Pull Human</button>
+        <button class="btn btn-xs btn-mach" style="background:var(--machbg);border:1px solid var(--machb);color:var(--mach)" onclick="selAndFetchM('${p}','${a.id}')">Pull Machine</button>
+        <button class="btn btn-o btn-xs" onclick="editAcct('${p}','${a.id}')">Edit</button>
+        <button class="btn btn-d btn-xs" onclick="delAcct('${p}','${a.id}')">Remove</button>
+      </div></div>
+    </div>`;
+  }).join('');
+}
+function acctDesc(p,a){
+  if(p==='aws')return`Region: ${a.region||'—'} · ${a.accountAlias||a.keyId?.slice(0,8)||'—'}`;
+  if(p==='azure')return`Sub: ${trunc(a.subId||'—',26)} · Tenant: ${a.tenantId?.slice(0,8)||'—'}`;
+  if(p==='gcp')return`Project: ${a.project||'—'}`;
+  if(p==='oci')return`Tenancy: ${a.tenancy?.slice(0,20)||'—'} · ${a.region||'—'}`;
+  return '';
+}
+function selAcct(p,id){
+  S.selected[p]=id;renderList(p);renderAcctSel(p);
+  const key=p==='azure'?'az':p;
+  const acct=getAcct(p,id);
+  if(acct){const e=document.getElementById(key+'-sub');if(e)e.textContent=acctDesc(p,acct);}
+}
+function selAndFetch(p,id){selAcct(p,id);nav(p,null);fetchCloud(p);}
+function selAndFetchM(p,id){selAcct(p,id);nav(p,null);setIT(p,'machine');fetchCloud(p,'machine');}
+function getAcct(p,id){return(S.accounts[p]||[]).find(a=>a.id===id);}
+function getSelAcct(p){return getAcct(p,S.selected[p]);}
+function delAcct(p,id){
+  if(!confirm('Remove this account and cached data?'))return;
+  S.accounts[p]=S.accounts[p].filter(a=>a.id!==id);delete S.data[id];
+  if(S.selected[p]===id)S.selected[p]=null;
+  saveState();renderAllLists();updateDots();refreshOv();toast('Account removed','warn');
+}
+function editAcct(p,id){editId=id;openAddAcct(p,id);}
+function gprov(id){for(const p of['aws','azure','gcp','oci'])if(S.accounts[p]?.find(a=>a.id===id))return p;return'aws';}
+
+// ═══ ACCOUNT SELECTOR CHIPS ═══
+function renderAcctSel(p){
+  const key=p==='azure'?'az':p;
+  const el=document.getElementById(key+'-acsel');if(!el)return;
+  const accts=S.accounts[p]||[];
+  const selId=S.selected[p];
+  el.innerHTML=accts.map(a=>{
+    const isSel=a.id===selId;
+    const hasD=!!(S.data[a.id]&&Object.keys(S.data[a.id]).length);
+    return `<div class="ach2 ${isSel?'sel2':'unsel'}" onclick="selAcct('${p}','${a.id}')">
+      <div class="dot ${hasD?'dok':isSel?'dwa':'dof'}" style="width:6px;height:6px"></div>${a.name}
+    </div>`;
+  }).join('')+`<button class="addbtn" onclick="openAddAcct('${p}')">+ Add</button>`;
+}
+
+// ═══ ADD/EDIT MODAL ═══
+function openAddAcct(p,eid){
+  editId=eid||null;
+  const existing=eid?getAcct(p||gprov(eid),eid):null;
+  p=p||(existing?gprov(eid):null)||'aws';
+  modalProv=p;
+  const tl={aws:'AWS Account',azure:'Azure Subscription',gcp:'GCP Project',oci:'OCI Tenancy'};
+  document.getElementById('modal-title').textContent=(eid?'Edit ':'Add ')+tl[p];
+  document.getElementById('modal-body').innerHTML=mForm(p,existing||{});
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('add-modal').classList.remove('open');editId=null;modalProv=null;}
+function tpwd(id){const e=document.getElementById(id);if(e)e.type=e.type==='password'?'text':'password';}
+
+function mForm(p,e){
+  if(p==='aws')return`
+    <div class="al alin mb"><strong>Get credentials:</strong> IAM → Security Credentials → Create access key. Use <code>aws sts get-session-token</code> for temp tokens.<br><strong>CORS proxy</strong> may be needed for IAM API calls from browser.</div>
+    <div class="fg"><label class="fl">Account Name <span>*</span></label><input id="mf-name" class="fc" placeholder="e.g. Prod AWS Account" value="${e.name||''}"/></div>
+    <div class="fr"><div class="fg"><label class="fl">Access Key ID <span>*</span></label><input id="mf-keyId" class="fc fc-mo" placeholder="AKIAIOSFODNN7EXAMPLE" value="${e.keyId||''}"/></div><div class="fg"><label class="fl">Secret Access Key <span>*</span></label><div class="pwe"><input id="mf-secret" class="fc fc-mo" type="password" placeholder="wJalrXUtnFEMI…" value="${e.secret||''}"/><span class="pti" onclick="tpwd('mf-secret')"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 7c2-4 10-4 12 0" stroke="currentColor" stroke-width="1.3"/></svg></span></div></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Session Token (STS, optional)</label><input id="mf-session" class="fc fc-mo" type="password" value="${e.session||''}"/></div><div class="fg"><label class="fl">Region <span>*</span></label><select id="mf-region" class="fc">${['us-east-1','us-west-2','eu-west-1','eu-central-1','eu-west-2','ap-southeast-1','ap-northeast-1'].map(r=>`<option${r===e.region?' selected':''}>${r}</option>`).join('')}</select></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Account Alias / Label</label><input id="mf-alias" class="fc" placeholder="prod-account-123" value="${e.accountAlias||''}"/></div><div class="fg"><label class="fl">CORS Proxy URL (optional)</label><input id="mf-proxy" class="fc fc-mo" placeholder="http://localhost:8080/" value="${e.proxy||''}"/></div></div>
+    <div id="mf-res"></div>`;
+  if(p==='azure')return`
+    <div class="al alin mb"><strong>ARM token:</strong> <code>az account get-access-token --resource https://management.azure.com -o tsv --query accessToken</code><br><strong>Graph token:</strong> <code>az account get-access-token --resource https://graph.microsoft.com -o tsv --query accessToken</code></div>
+    <div class="fg"><label class="fl">Account Name <span>*</span></label><input id="mf-name" class="fc" placeholder="e.g. Production Subscription" value="${e.name||''}"/></div>
+    <div class="fg"><label class="fl">ARM Bearer Token <span>*</span> <small>(management.azure.com)</small></label><textarea id="mf-armToken" class="fc fc-mo" placeholder="eyJ0eXAiOiJKV1Q…">${e.armToken||''}</textarea></div>
+    <div class="fg"><label class="fl">Graph Bearer Token <span>*</span> <small>(graph.microsoft.com — for AD users/groups)</small></label><textarea id="mf-graphToken" class="fc fc-mo" placeholder="eyJ0eXAiOiJKV1Q…">${e.graphToken||''}</textarea></div>
+    <div class="fr"><div class="fg"><label class="fl">Subscription ID <span>*</span></label><input id="mf-subId" class="fc fc-mo" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="${e.subId||''}"/></div><div class="fg"><label class="fl">Tenant ID</label><input id="mf-tenantId" class="fc fc-mo" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="${e.tenantId||''}"/></div></div>
+    <div id="mf-res"></div>`;
+  if(p==='gcp')return`
+    <div class="al alin mb"><strong>Get token:</strong> <code>gcloud auth print-access-token</code><br>For SA: <code>gcloud auth activate-service-account --key-file=sa.json && gcloud auth print-access-token</code></div>
+    <div class="fg"><label class="fl">Account Name <span>*</span></label><input id="mf-name" class="fc" placeholder="e.g. Production GCP Project" value="${e.name||''}"/></div>
+    <div class="fg"><label class="fl">OAuth2 Access Token <span>*</span></label><textarea id="mf-token" class="fc fc-mo" placeholder="ya29.A0AfH6SMB…">${e.token||''}</textarea></div>
+    <div class="fr"><div class="fg"><label class="fl">Project ID <span>*</span></label><input id="mf-project" class="fc fc-mo" placeholder="my-project-123456" value="${e.project||''}"/></div><div class="fg"><label class="fl">Org ID (optional)</label><input id="mf-org" class="fc fc-mo" placeholder="123456789" value="${e.org||''}"/></div></div>
+    <div id="mf-res"></div>`;
+  if(p==='oci')return`
+    <div class="al alin mb"><strong>Get token:</strong> OCI Console → User Settings → Auth Tokens → Generate. Or use instance/resource principal tokens from metadata endpoint.</div>
+    <div class="fg"><label class="fl">Account Name <span>*</span></label><input id="mf-name" class="fc" placeholder="e.g. Production Tenancy" value="${e.name||''}"/></div>
+    <div class="fg"><label class="fl">Auth / Bearer Token <span>*</span></label><textarea id="mf-token" class="fc fc-mo" placeholder="Paste OCI auth token or bearer…">${e.token||''}</textarea></div>
+    <div class="fr"><div class="fg"><label class="fl">Tenancy OCID <span>*</span></label><input id="mf-tenancy" class="fc fc-mo" placeholder="ocid1.tenancy.oc1..aaaa…" value="${e.tenancy||''}"/></div><div class="fg"><label class="fl">Region <span>*</span></label><select id="mf-region" class="fc">${['eu-amsterdam-1','eu-frankfurt-1','us-ashburn-1','us-phoenix-1','ap-tokyo-1','uk-london-1'].map(r=>`<option${r===e.region?' selected':''}>${r}</option>`).join('')}</select></div></div>
+    <div class="fg"><label class="fl">Compartment OCID (optional, blank = root)</label><input id="mf-compartment" class="fc fc-mo" placeholder="ocid1.compartment.oc1…" value="${e.compartment||''}"/></div>
+    <div id="mf-res"></div>`;
+}
+
+function saveAcct(){
+  const p=modalProv;if(!p)return;
+  const name=v('mf-name');if(!name){toast('Account name required','error');return;}
+  let acct={id:editId||uid(),name};
+  if(p==='aws'){
+    if(!v('mf-keyId')||!v('mf-secret')){toast('Key ID and Secret required','error');return;}
+    acct={...acct,keyId:v('mf-keyId'),secret:v('mf-secret'),session:v('mf-session'),region:v('mf-region')||'us-east-1',accountAlias:v('mf-alias'),proxy:v('mf-proxy')};
+  }else if(p==='azure'){
+    if(!v('mf-armToken')){toast('ARM token required','error');return;}
+    acct={...acct,armToken:v('mf-armToken'),graphToken:v('mf-graphToken'),subId:v('mf-subId'),tenantId:v('mf-tenantId')};
+  }else if(p==='gcp'){
+    if(!v('mf-token')||!v('mf-project')){toast('Token and Project ID required','error');return;}
+    acct={...acct,token:v('mf-token'),project:v('mf-project'),org:v('mf-org')};
+  }else if(p==='oci'){
+    if(!v('mf-token')||!v('mf-tenancy')){toast('Token and Tenancy OCID required','error');return;}
+    acct={...acct,token:v('mf-token'),tenancy:v('mf-tenancy'),region:v('mf-region')||'eu-amsterdam-1',compartment:v('mf-compartment')};
+  }
+  if(editId){const i=S.accounts[p].findIndex(a=>a.id===editId);if(i>=0)S.accounts[p][i]=acct;}
+  else S.accounts[p].push(acct);
+  if(!S.selected[p])S.selected[p]=acct.id;
+  saveState();renderAllLists();updateCounts();renderAcctSel(p);closeModal();
+  toast(`"${name}" saved`,'success');
+}
+
+async function testConn(){
+  const p=modalProv;const res=document.getElementById('mf-res');if(!res)return;
+  res.innerHTML='<div class="al alin">Testing…</div>';
+  try{
+    if(p==='aws'){
+      const cfg={keyId:v('mf-keyId'),secret:v('mf-secret'),session:v('mf-session'),region:v('mf-region')||'us-east-1',proxy:v('mf-proxy')};
+      const doc=await awsIAM('GetUser',{},cfg);const un=xmlV(doc.documentElement,'UserName');
+      res.innerHTML=`<div class="al alsu">&#x2713; Connected as: ${un||'(service account)'}</div>`;
+    }else if(p==='azure'){
+      const tk=v('mf-graphToken')||v('mf-armToken');
+      const r=await fetch('https://graph.microsoft.com/v1.0/me',{headers:{Authorization:'Bearer '+tk}});
+      if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();
+      res.innerHTML=`<div class="al alsu">&#x2713; Connected as: ${j.displayName||j.userPrincipalName||'Service Principal'}</div>`;
+    }else if(p==='gcp'){
+      const r=await fetch(`https://cloudresourcemanager.googleapis.com/v1/projects/${v('mf-project')}`,{headers:{Authorization:'Bearer '+v('mf-token')}});
+      if(!r.ok){const j=await r.json();throw new Error(j.error?.message||'HTTP '+r.status);}
+      const j=await r.json();res.innerHTML=`<div class="al alsu">&#x2713; Project: ${j.name} (${j.lifecycleState})</div>`;
+    }else if(p==='oci'){
+      const base=`https://identity.${v('mf-region')||'eu-amsterdam-1'}.oci.oraclecloud.com/20160918`;
+      const r=await fetch(`${base}/tenancies/${v('mf-tenancy')}`,{headers:{Authorization:'Bearer '+v('mf-token')}});
+      if(!r.ok){const j=await r.json();throw new Error(j.message||'HTTP '+r.status);}
+      const j=await r.json();res.innerHTML=`<div class="al alsu">&#x2713; Tenancy: ${j.name} · Home: ${j.homeRegionKey}</div>`;
+    }
+  }catch(e){res.innerHTML=`<div class="al aler">&#x2717; ${e.message.slice(0,100)}</div>`;}
+}
+
+// ═══ IDENTITY TYPE SWITCHER ═══
+function setIT(p,type){
+  S.idType[p]=type;
+  const key=p==='azure'?'az':p;
+  const hb=document.getElementById(key+'-ith');const mb=document.getElementById(key+'-itm');
+  if(hb)hb.className='itb'+(type==='human'?' ah':'');
+  if(mb)mb.className='itb'+(type==='machine'?' am':'');
+  const hs=document.getElementById(key+'-hsec');const ms=document.getElementById(key+'-msec');
+  if(hs)hs.style.display=type==='human'?'block':'none';
+  if(ms)ms.style.display=type==='machine'?'block':'none';
+}
+
+// ═══ AWS SIGV4 ═══
+async function hmacSHA256(key,data){
+  const k=typeof key==='string'?new TextEncoder().encode(key):key;
+  const ck=await crypto.subtle.importKey('raw',k,{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  return new Uint8Array(await crypto.subtle.sign('HMAC',ck,new TextEncoder().encode(data)));
+}
+async function sha256hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+const toHex=b=>Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');
+
+async function awsSigned(method,service,region,baseUrl,queryParams,cfg){
+  const qs=new URLSearchParams(queryParams);
+  const url=(cfg.proxy?cfg.proxy+encodeURIComponent(baseUrl+'?'+qs):baseUrl+'?'+qs);
+  const signUrl=cfg.proxy?baseUrl+'?'+qs:url;
+  const now=new Date();const amzD=now.toISOString().replace(/[:-]|\.\d{3}/g,'').slice(0,15)+'Z';const ds=amzD.slice(0,8);
+  const pu=new URL(signUrl);const ph=await sha256hex('');
+  const hs={'host':pu.hostname,'x-amz-date':amzD,'x-amz-content-sha256':ph};
+  if(cfg.session)hs['x-amz-security-token']=cfg.session;
+  const shn=Object.keys(hs).map(k=>k.toLowerCase()).sort();
+  const ch=shn.map(k=>`${k}:${hs[Object.keys(hs).find(h=>h.toLowerCase()===k)]}\n`).join('');
+  const sh=shn.join(';');
+  const cqs=[...pu.searchParams.entries()].sort(([a],[b])=>a<b?-1:1).map(([k,v])=>`${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+  const cr=[method,pu.pathname||'/',cqs,ch,sh,ph].join('\n');
+  const scope=`${ds}/${region}/${service}/aws4_request`;
+  const sts=`AWS4-HMAC-SHA256\n${amzD}\n${scope}\n${await sha256hex(cr)}`;
+  let sk=await hmacSHA256('AWS4'+cfg.secret,ds);sk=await hmacSHA256(sk,region);sk=await hmacSHA256(sk,service);sk=await hmacSHA256(sk,'aws4_request');
+  const sig=toHex(await hmacSHA256(sk,sts));
+  const authH=`AWS4-HMAC-SHA256 Credential=${cfg.keyId}/${scope}, SignedHeaders=${sh}, Signature=${sig}`;
+  const resp=await fetch(url,{headers:{...hs,'Authorization':authH}});
+  if(!resp.ok){const t=await resp.text();throw new Error(`${service.toUpperCase()} ${resp.status}: ${t.slice(0,120)}`);}
+  return resp;
+}
+async function awsIAM(action,params,cfg){
+  const r=await awsSigned('GET','iam','us-east-1','https://iam.amazonaws.com/',{Action:action,Version:'2010-05-08',...params},cfg);
+  return new DOMParser().parseFromString(await r.text(),'application/xml');
+}
+async function awsEC2call(action,params,cfg){
+  const region=cfg.region||'us-east-1';
+  const r=await awsSigned('GET','ec2',region,`https://ec2.${region}.amazonaws.com/`,{Action:action,Version:'2016-11-15',...params},cfg);
+  return new DOMParser().parseFromString(await r.text(),'application/xml');
+}
+async function awsLambdaCall(cfg){
+  const region=cfg.region||'us-east-1';
+  const r=await awsSigned('GET','lambda',region,`https://lambda.${region}.amazonaws.com/2015-03-31/functions`,{MaxItems:100},cfg);
+  return r.json();
+}
+
+// ═══ FETCH ORCHESTRATORS ═══
+async function fetchCloud(p,mode){
+  const acct=getSelAcct(p);
+  if(!acct){toast(`Select a ${p} account first`,'warn');nav('accounts',null);return;}
+  const key=p==='azure'?'az':p;
+  setCS(key,'loading','Connecting…');
+  if(!S.data[acct.id])S.data[acct.id]={};
+  let ok=0;
+  try{
+    if(p==='aws')ok=await fetchAWS(acct,mode);
+    else if(p==='azure')ok=await fetchAzure(acct,mode);
+    else if(p==='gcp')ok=await fetchGCP(acct,mode);
+    else if(p==='oci')ok=await fetchOCI(acct,mode);
+    if(ok>0){setCS(key,'ok',`Connected · ${ok} endpoint${ok>1?'s':''} OK`);toast(`${p.toUpperCase()} ${mode||'human'} data pulled`,'success');}
+    else{setCS(key,'err','No data retrieved');toast(`${p.toUpperCase()} fetch returned no data`,'warn');}
+  }catch(e){setCS(key,'err',e.message.slice(0,40));toast(e.message.slice(0,70),'error');}
+  updateDots();refreshOv();
+  document.getElementById('last-ref').textContent='Last: '+new Date().toLocaleTimeString();
+}
+
+// ═══ AWS ═══
+async function fetchAWS(acct,mode){
+  const d=S.data[acct.id];let ok=0;
+  const subEl=document.getElementById('aws-sub');if(subEl)subEl.textContent=acctDesc('aws',acct);
+  if(mode==='machine'){
+    setLoading('tb-aws-ec2-tbody',8);setLoading('tb-aws-lmb-tbody',7);setLoading('tb-aws-ip-tbody',6);
+    try{const ec2=await fetchEC2(acct);d.ec2=ec2;renderEC2(ec2,acct);ok++;}catch(e){setEmpty('tb-aws-ec2-tbody',8,'EC2: '+e.message.slice(0,60));}
+    try{const ip=await fetchIPs(acct);d.instanceProfiles=ip;renderIPs(ip,acct);ok++;}catch(e){setEmpty('tb-aws-ip-tbody',6,'Profiles: '+e.message.slice(0,60));}
+    try{const lmb=await awsLambdaCall(acct);const fns=(lmb.Functions||[]).map(f=>({Name:f.FunctionName,Runtime:f.Runtime,Role:f.Role,LastModified:f.LastModified}));d.lambda=fns;renderLambda(fns,acct);ok++;}catch(e){setEmpty('tb-aws-lmb-tbody',7,'Lambda: '+e.message.slice(0,60));}
+    return ok;
+  }
+  setLoading('tb-aws-u-tbody',7);setLoading('tb-aws-r-tbody',7);setLoading('tb-aws-p-tbody',5);setLoading('tb-aws-g-tbody',5);setLoading('tb-aws-cr-tbody',8);
+  try{let us=[],mk=null;do{const p2={MaxItems:100};if(mk)p2.Marker=mk;const doc=await awsIAM('ListUsers',p2,acct);xmlNs(doc,'member').forEach(u=>us.push({UserName:xmlV(u,'UserName'),Arn:xmlV(u,'Arn'),CreateDate:xmlV(u,'CreateDate'),PasswordLastUsed:xmlV(u,'PasswordLastUsed')}));mk=xmlV(doc.documentElement,'IsTruncated')==='true'?xmlV(doc.documentElement,'Marker'):null;}while(mk);d.users=us;renderAWSUsers(us,acct);window['aws-users']=us;document.getElementById('tc-aws-u').textContent=us.length;ok++;}catch(e){setEmpty('tb-aws-u-tbody',7,'Users: '+e.message.slice(0,60));}
+  try{let rs=[],mk=null;do{const p2={MaxItems:100};if(mk)p2.Marker=mk;const doc=await awsIAM('ListRoles',p2,acct);xmlNs(doc,'member').forEach(r=>rs.push({RoleName:xmlV(r,'RoleName'),Arn:xmlV(r,'Arn'),CreateDate:xmlV(r,'CreateDate'),Description:xmlV(r,'Description'),MaxSessionDuration:xmlV(r,'MaxSessionDuration')}));mk=xmlV(doc.documentElement,'IsTruncated')==='true'?xmlV(doc.documentElement,'Marker'):null;}while(mk);d.roles=rs;renderAWSRoles(rs,acct);document.getElementById('tc-aws-r').textContent=rs.length;ok++;}catch(e){setEmpty('tb-aws-r-tbody',7,'Roles: '+e.message.slice(0,60));}
+  try{const doc=await awsIAM('ListPolicies',{Scope:'Local',MaxItems:100},acct);const ps=xmlNs(doc,'member').map(p=>({PolicyName:xmlV(p,'PolicyName'),Arn:xmlV(p,'Arn'),AttachmentCount:xmlV(p,'AttachmentCount'),UpdateDate:xmlV(p,'UpdateDate')}));d.policies=ps;renderAWSPolicies(ps,acct);document.getElementById('tc-aws-p').textContent=ps.length;ok++;}catch(e){setEmpty('tb-aws-p-tbody',5,'Policies: '+e.message.slice(0,60));}
+  try{const doc=await awsIAM('ListGroups',{MaxItems:100},acct);const gs=xmlNs(doc,'member').map(g=>({GroupName:xmlV(g,'GroupName'),Arn:xmlV(g,'Arn'),Path:xmlV(g,'Path'),CreateDate:xmlV(g,'CreateDate')}));d.groups=gs;renderAWSGroups(gs,acct);document.getElementById('tc-aws-g').textContent=gs.length;ok++;}catch(e){setEmpty('tb-aws-g-tbody',5,'Groups: '+e.message.slice(0,60));}
+  try{try{await awsIAM('GenerateCredentialReport',{},acct);}catch(e){}await new Promise(r=>setTimeout(r,2000));const doc=await awsIAM('GetCredentialReport',{},acct);const raw=atob(xmlV(doc.documentElement,'Content'));const hdr=raw.split('\n')[0].split(',');const rows=raw.split('\n').slice(1).filter(l=>l.trim()).map(l=>{const vs=l.split(',');const o={};hdr.forEach((h,i)=>o[h]=vs[i]||'');return o;});d.credReport=rows;renderCredReport(rows,acct);ok++;}catch(e){setEmpty('tb-aws-cr-tbody',8,'CredReport: '+e.message.slice(0,60));}
+  return ok;
+}
+async function fetchEC2(acct){
+  const doc=await awsEC2call('DescribeInstances',{},acct);const inst=[];
+  xmlNs(doc,'item').forEach(r=>xmlNs(r,'instancesSet').forEach(is=>xmlNs(is,'item').forEach(i=>{
+    const nm=xmlNs(i,'item').find(t=>xmlV(t,'key')==='Name');
+    inst.push({InstanceId:xmlV(i,'instanceId'),InstanceType:xmlV(i,'instanceType'),State:xmlV(xmlNs(i,'instanceState')[0]||i,'name'),PublicIp:xmlV(i,'ipAddress'),PrivateIp:xmlV(i,'privateIpAddress'),LaunchTime:xmlV(i,'launchTime'),Name:nm?xmlV(nm,'value'):'',IamProfile:xmlV(xmlNs(i,'iamInstanceProfile')[0]||i,'arn')||''});
+  })));
+  return inst;
+}
+async function fetchIPs(acct){
+  const doc=await awsIAM('ListInstanceProfiles',{MaxItems:100},acct);
+  return xmlNs(doc,'member').map(p=>({Name:xmlV(p,'InstanceProfileName'),Arn:xmlV(p,'Arn'),CreateDate:xmlV(p,'CreateDate'),Roles:xmlNs(p,'roles').map(r=>xmlV(r,'RoleName')).filter(Boolean)}));
+}
+
+// ═══ AWS RENDERERS ═══
+function renderAWSUsers(users,acct){
+  const tb=document.getElementById('tb-aws-u-tbody');
+  if(!users.length){setEmpty('tb-aws-u-tbody',7,'No IAM users found');return;}
+  tb.innerHTML=users.map(u=>{
+    const isRoot=u.Arn?.includes(':root');const noUsed=!u.PasswordLastUsed;
+    const f={root:isRoot,dormant:noUsed&&!isRoot};const score=rs(f);
+    const ac=score>=70?'#dc2626':score>=45?'#ea580c':score>=20?'#d97706':'#64748b';
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...u,_cloud:'aws',_type:'human',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia" style="background:${ac}">${u.UserName.slice(0,2).toUpperCase()}</div><div><div class="in2">${u.UserName}</div><div class="is2">${isRoot?'Root Account':'IAM User'}</div></div></div></td>
+      <td><span class="mono">${trunc(u.Arn,36)}</span></td><td class="mono">${fmtD(u.CreateDate)}</td>
+      <td style="color:${u.PasswordLastUsed?'var(--mu)':'var(--red)'}">${u.PasswordLastUsed?fmtD(u.PasswordLastUsed):'<span class="b bcr">Never</span>'}</td>
+      <td>—</td><td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderAWSUsersRows(users){renderAWSUsers(users,{name:'filtered'});}
+function renderAWSRoles(roles,acct){
+  const tb=document.getElementById('tb-aws-r-tbody');
+  if(!roles.length){setEmpty('tb-aws-r-tbody',7,'No roles');return;}
+  tb.innerHTML=roles.map(r=>{const isAdmin=r.RoleName.toLowerCase().includes('admin');const maxS=parseInt(r.MaxSessionDuration)||3600;const score=rs({admin:isAdmin,machAdmin:maxS>7200});
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...r,_cloud:'aws',_type:'human_role',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia" style="background:var(--purple)">${r.RoleName.slice(0,2).toUpperCase()}</div><div><div class="in2">${r.RoleName}</div><div class="is2">IAM Role</div></div></div></td>
+      <td><span class="mono">${trunc(r.Arn,36)}</span></td><td class="mono">${fmtD(r.CreateDate)}</td>
+      <td>${Math.round(maxS/3600)}h</td><td class="mono">${trunc(r.Description||'—',32)}</td>
+      <td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderAWSPolicies(policies,acct){
+  const tb=document.getElementById('tb-aws-p-tbody');
+  if(!policies.length){setEmpty('tb-aws-p-tbody',5,'No customer policies');return;}
+  tb.innerHTML=policies.map(p=>`<tr><td><div class="in2">${p.PolicyName}</div></td><td><span class="mono">${trunc(p.Arn,36)}</span></td><td style="font-weight:700">${p.AttachmentCount||0}</td><td class="mono">${fmtD(p.UpdateDate)}</td><td>${abadge(acct)}</td></tr>`).join('');
+}
+function renderAWSGroups(groups,acct){
+  const tb=document.getElementById('tb-aws-g-tbody');
+  if(!groups.length){setEmpty('tb-aws-g-tbody',5,'No groups');return;}
+  tb.innerHTML=groups.map(g=>`<tr><td><div class="in2">${g.GroupName}</div></td><td><span class="mono">${trunc(g.Arn,36)}</span></td><td class="mono">${g.Path||'/'}</td><td class="mono">${fmtD(g.CreateDate)}</td><td>${abadge(acct)}</td></tr>`).join('');
+}
+function renderCredReport(rows,acct){
+  const tb=document.getElementById('tb-aws-cr-tbody');
+  if(!rows.length){setEmpty('tb-aws-cr-tbody',8,'No data');return;}
+  tb.innerHTML=rows.map(r=>{const mfa=r['mfa_active']==='true';const k1=r['access_key_1_active']==='true';const k2=r['access_key_2_active']==='true';
+    return `<tr><td><span class="mono">${r.user}</span></td><td>${mfa?'<span class="b bsu">Active</span>':'<span class="b bcr">Inactive</span>'}</td><td class="mono">${fmtD(r.password_last_used)}</td><td>${k1?'<span class="b bsu">Yes</span>':'<span class="b bgy">No</span>'}</td><td class="mono">${fmtD(r.access_key_1_last_used_date)}</td><td>${k2?'<span class="b bsu">Yes</span>':'<span class="b bgy">No</span>'}</td><td class="mono">${fmtD(r.access_key_2_last_used_date)}</td><td>${abadge(acct)}</td></tr>`;
+  }).join('');
+}
+function renderEC2(instances,acct){
+  const tb=document.getElementById('tb-aws-ec2-tbody');document.getElementById('tc-aws-ec2').textContent=instances.length;
+  if(!instances.length){setEmpty('tb-aws-ec2-tbody',8,'No EC2 instances');return;}
+  tb.innerHTML=instances.map(i=>{
+    const hasPub=!!i.PublicIp;const hasProf=!!i.IamProfile;const isAdmin=(i.IamProfile||'').toLowerCase().includes('admin');
+    const f={pubIP:hasPub,machRole:hasProf,machAdmin:isAdmin,machWild:(i.IamProfile||'').includes('*')};const score=rs(f);
+    const lvl=rl(score);const ac={cr:'#dc2626',hi:'#ea580c',me:'#d97706',lo:'#16a34a'}[lvl];
+    const nm=i.Name||i.InstanceId;
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...i,_cloud:'aws',_type:'machine_ec2',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia mach" style="background:${ac}">${nm.slice(0,2).toUpperCase()}</div><div><div class="in2">${trunc(nm,25)}</div><div class="is2">${i.InstanceId}</div></div></div></td>
+      <td><span class="b bgy">${i.InstanceType||'—'}</span></td>
+      <td><span class="b ${i.State==='running'?'bsu':'bgy'}">${i.State||'—'}</span></td>
+      <td>${i.PublicIp?`<span class="rfb rfp">${i.PublicIp}</span>`:'<span class="b blo">Private</span>'}</td>
+      <td>${i.IamProfile?`<span class="mono">${trunc(i.IamProfile.split('/').pop(),22)}</span>`:'<span class="b bgy">No Profile</span>'}</td>
+      <td>${rfbadges(f)}</td><td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderIPs(profiles,acct){
+  const tb=document.getElementById('tb-aws-ip-tbody');document.getElementById('tc-aws-ip').textContent=profiles.length;
+  if(!profiles.length){setEmpty('tb-aws-ip-tbody',6,'No instance profiles');return;}
+  tb.innerHTML=profiles.map(p=>{const isAdmin=(p.Name||'').toLowerCase().includes('admin');const score=rs({admin:isAdmin});
+    return `<tr><td><div class="in2">${p.Name}</div></td><td><span class="mono">${trunc(p.Arn,36)}</span></td><td>${(p.Roles||[]).map(r=>`<span class="b bpu" style="font-size:9px">${r}</span>`).join(' ')||'—'}</td><td class="mono">${fmtD(p.CreateDate)}</td><td>${rring(score)}</td><td>${abadge(acct)}</td></tr>`;
+  }).join('');
+}
+function renderLambda(fns,acct){
+  const tb=document.getElementById('tb-aws-lmb-tbody');document.getElementById('tc-aws-lmb').textContent=fns.length;
+  if(!fns.length){setEmpty('tb-aws-lmb-tbody',7,'No Lambda functions');return;}
+  tb.innerHTML=fns.map(f=>{const isAdmin=(f.Role||'').toLowerCase().includes('admin');const score=rs({machAdmin:isAdmin,machWild:(f.Role||'').includes('*')});
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...f,_cloud:'aws',_type:'machine_lambda',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia mach" style="background:var(--mach)">${f.Name.slice(0,2).toUpperCase()}</div><div><div class="in2">${trunc(f.Name,28)}</div><div class="is2">Lambda Function</div></div></div></td>
+      <td><span class="b bgy">${f.Runtime||'—'}</span></td>
+      <td><span class="mono">${trunc((f.Role||'').split('/').pop(),28)}</span></td>
+      <td class="mono">${fmtD(f.LastModified)}</td>
+      <td>${rfbadges({machAdmin:isAdmin})}</td><td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ AZURE ═══
+async function fetchAzure(acct,mode){
+  const d=S.data[acct.id];let ok=0;const gt=acct.graphToken||acct.armToken;const at=acct.armToken;
+  const subEl=document.getElementById('az-sub');if(subEl)subEl.textContent=acctDesc('azure',acct);
+  if(mode==='machine'){
+    setLoading('tb-az-vm-tbody',9);setLoading('tb-az-mi-tbody',7);
+    if(acct.subId){
+      try{const r=await fetch(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.Compute/virtualMachines?api-version=2023-03-01`,{headers:{Authorization:'Bearer '+at}});if(!r.ok)throw new Error('VMs HTTP '+r.status);const j=await r.json();d.vms=j.value||[];renderAzureVMs(d.vms,acct);document.getElementById('tc-az-vm').textContent=d.vms.length;ok++;}catch(e){setEmpty('tb-az-vm-tbody',9,'VMs: '+e.message.slice(0,60));}
+      try{const r=await fetch(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.ManagedIdentity/userAssignedIdentities?api-version=2023-01-31`,{headers:{Authorization:'Bearer '+at}});if(!r.ok)throw new Error('MI HTTP '+r.status);const j=await r.json();d.managedIds=j.value||[];renderManagedIds(d.managedIds,acct);document.getElementById('tc-az-mi').textContent=d.managedIds.length;ok++;}catch(e){setEmpty('tb-az-mi-tbody',7,'MI: '+e.message.slice(0,60));}
+    }return ok;
+  }
+  setLoading('tb-az-u-tbody',7);setLoading('tb-az-sp-tbody',6);setLoading('tb-az-r-tbody',6);setLoading('tb-az-g-tbody',5);
+  try{const r=await fetch('https://graph.microsoft.com/v1.0/users?$select=id,displayName,userPrincipalName,accountEnabled,jobTitle,department,createdDateTime,signInActivity&$top=100',{headers:{Authorization:'Bearer '+gt}});if(!r.ok){const j=await r.json();throw new Error(j.error?.message||'HTTP '+r.status);}const j=await r.json();d.users=j.value||[];renderAzureUsers(d.users,acct);document.getElementById('tc-az-u').textContent=d.users.length;ok++;}catch(e){setEmpty('tb-az-u-tbody',7,'Users: '+e.message.slice(0,60));}
+  try{const r=await fetch('https://graph.microsoft.com/v1.0/servicePrincipals?$select=id,displayName,appId,servicePrincipalType,accountEnabled&$top=100',{headers:{Authorization:'Bearer '+gt}});if(!r.ok)throw new Error('SP HTTP '+r.status);const j=await r.json();d.sps=j.value||[];renderAzureSPs(d.sps,acct);document.getElementById('tc-az-sp').textContent=d.sps.length;ok++;}catch(e){setEmpty('tb-az-sp-tbody',6,'SPs: '+e.message.slice(0,60));}
+  if(acct.subId){try{const r=await fetch(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.Authorization/roleAssignments?api-version=2022-04-01`,{headers:{Authorization:'Bearer '+at}});if(!r.ok)throw new Error('Roles HTTP '+r.status);const j=await r.json();d.roleAssignments=j.value||[];renderAzureRoles(d.roleAssignments,acct);document.getElementById('tc-az-r').textContent=d.roleAssignments.length;ok++;}catch(e){setEmpty('tb-az-r-tbody',6,'Roles: '+e.message.slice(0,60));}}
+  try{const r=await fetch('https://graph.microsoft.com/v1.0/groups?$select=id,displayName,mail,securityEnabled&$top=100',{headers:{Authorization:'Bearer '+gt}});if(!r.ok)throw new Error('Groups HTTP '+r.status);const j=await r.json();d.groups=j.value||[];renderAzureGroups(d.groups,acct);document.getElementById('tc-az-g').textContent=d.groups.length;ok++;}catch(e){setEmpty('tb-az-g-tbody',5,'Groups: '+e.message.slice(0,60));}
+  return ok;
+}
+function renderAzureUsers(users,acct){
+  const tb=document.getElementById('tb-az-u-tbody');if(!users.length){setEmpty('tb-az-u-tbody',7,'No users');return;}
+  tb.innerHTML=users.map(u=>{const dormant=u.signInActivity?.lastSignInDateTime&&(Date.now()-new Date(u.signInActivity.lastSignInDateTime).getTime())>90*86400000;const score=rs({dormant:!u.signInActivity?.lastSignInDateTime||dormant});const ac=['#7c3aed','#0d9488','#d97706','#0078d4'][Math.abs((u.id||'').charCodeAt(0)||0)%4];
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...u,_cloud:'azure',_type:'human',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia" style="background:${ac}">${(u.displayName||'?').slice(0,2).toUpperCase()}</div><div><div class="in2">${u.displayName||'—'}</div><div class="is2">${trunc(u.id||'',26)}</div></div></div></td>
+      <td><span class="mono">${trunc(u.userPrincipalName||'—',30)}</span></td>
+      <td>${u.accountEnabled?'<span class="b bsu">Enabled</span>':'<span class="b bcr">Disabled</span>'}</td>
+      <td class="mono">${trunc((u.jobTitle?u.jobTitle+(u.department?' · '+u.department:''):'—'),28)}</td>
+      <td style="color:${dormant?'var(--red)':'var(--mu)'}">${u.signInActivity?.lastSignInDateTime?fmtD(u.signInActivity.lastSignInDateTime):'<span class="b bgy">Never</span>'}</td>
+      <td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderAzureSPs(sps,acct){
+  const tb=document.getElementById('tb-az-sp-tbody');if(!sps.length){setEmpty('tb-az-sp-tbody',6,'No SPs');return;}
+  tb.innerHTML=sps.map(sp=>{const score=rs({serviceWithAdmin:sp.servicePrincipalType==='Application'});
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...sp,_cloud:'azure',_type:'human_sp',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia" style="background:var(--purple)">${(sp.displayName||'?').slice(0,2).toUpperCase()}</div><div><div class="in2">${sp.displayName||'—'}</div><div class="is2">Service Principal</div></div></div></td>
+      <td><span class="mono">${trunc(sp.appId||'',26)}</span></td><td><span class="b bpu">${sp.servicePrincipalType||'—'}</span></td>
+      <td>${sp.accountEnabled?'<span class="b bsu">Yes</span>':'<span class="b bgy">No</span>'}</td>
+      <td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderAzureRoles(roles,acct){
+  const tb=document.getElementById('tb-az-r-tbody');if(!roles.length){setEmpty('tb-az-r-tbody',6,'No role assignments');return;}
+  tb.innerHTML=roles.map(r=>{const p=r.properties||{};const isOwner=(p.roleDefinitionId||'').includes('8e3af657');const score=rs({admin:isOwner});
+    return `<tr><td><span class="mono">${trunc(p.principalId||'',26)}</span></td><td><span class="mono">${trunc((p.roleDefinitionId||'').split('/').pop(),24)}</span>${isOwner?'<span class="b bcr" style="margin-left:4px">Owner</span>':''}</td><td class="mono">${trunc(p.scope||'',32)}</td><td><span class="b bgy">${p.principalType||'—'}</span></td><td>${rring(score)}</td><td>${abadge(acct)}</td></tr>`;
+  }).join('');
+}
+function renderAzureGroups(groups,acct){
+  const tb=document.getElementById('tb-az-g-tbody');if(!groups.length){setEmpty('tb-az-g-tbody',5,'No groups');return;}
+  tb.innerHTML=groups.map(g=>`<tr><td><div class="in2">${g.displayName||'—'}</div></td><td><span class="mono">${trunc(g.id||'',26)}</span></td><td class="mono">${g.mail||'—'}</td><td>${boolB(g.securityEnabled)}</td><td>${abadge(acct)}</td></tr>`).join('');
+}
+function renderAzureVMs(vms,acct){
+  const tb=document.getElementById('tb-az-vm-tbody');document.getElementById('tc-az-vm').textContent=vms.length;
+  if(!vms.length){setEmpty('tb-az-vm-tbody',9,'No VMs found');return;}
+  tb.innerHTML=vms.map(vm=>{const id=vm.identity||{};const hasSys=id.type?.includes('SystemAssigned');const hasUser=id.type?.includes('UserAssigned');const hasMI=hasSys||hasUser;
+    const f={pubIP:false,machRole:hasMI,machAdmin:hasMI&&(vm.name||'').toLowerCase().includes('admin')};const score=rs(f);
+    const lvl=rl(score);const ac={cr:'#dc2626',hi:'#ea580c',me:'#d97706',lo:'#16a34a'}[lvl];
+    const miLbl=hasSys&&hasUser?'System+User':hasSys?'System':hasUser?'User':'None';
+    return `<tr onclick="showDetail(${ek(JSON.stringify({name:vm.name,location:vm.location,vmSize:vm.properties?.hardwareProfile?.vmSize,osType:vm.properties?.storageProfile?.osDisk?.osType,identityType:id.type,_cloud:'azure',_type:'machine_vm',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia mach" style="background:${ac}">${(vm.name||'VM').slice(0,2).toUpperCase()}</div><div><div class="in2">${trunc(vm.name||'—',22)}</div><div class="is2">${vm.location||'—'}</div></div></div></td>
+      <td><span class="b bgy">${vm.properties?.hardwareProfile?.vmSize||'—'}</span></td>
+      <td><span class="b bgy">${vm.properties?.storageProfile?.osDisk?.osType||'—'}</span></td>
+      <td><span class="b bgy">—</span></td>
+      <td>${hasMI?`<span class="b bmach">${miLbl} MI</span>`:'<span class="b bgy">None</span>'}</td>
+      <td><span class="b ${hasSys?'bmach':'bgy'}">${id.type||'None'}</span></td>
+      <td>${rfbadges(f)}</td><td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderManagedIds(mis,acct){
+  const tb=document.getElementById('tb-az-mi-tbody');document.getElementById('tc-az-mi').textContent=mis.length;
+  if(!mis.length){setEmpty('tb-az-mi-tbody',7,'No user-assigned MIs found');return;}
+  tb.innerHTML=mis.map(m=>{const p=m.properties||{};const score=rs({});
+    return `<tr onclick="showDetail(${ek(JSON.stringify({name:m.name,location:m.location,clientId:p.clientId,principalId:p.principalId,_cloud:'azure',_type:'machine_mi',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia mach" style="background:var(--mach)">${(m.name||'MI').slice(0,2).toUpperCase()}</div><div><div class="in2">${m.name||'—'}</div><div class="is2">User-Assigned MI</div></div></div></td>
+      <td><span class="b bmach">User Assigned</span></td>
+      <td><span class="mono">${trunc(p.clientId||'',26)}</span></td><td><span class="mono">${trunc(p.principalId||'',26)}</span></td>
+      <td class="mono">${trunc(m.id?.split('/resourceGroups/')[1]?.split('/')[0]||'—',20)}</td>
+      <td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ GCP ═══
+async function fetchGCP(acct,mode){
+  const d=S.data[acct.id];let ok=0;const H={Authorization:'Bearer '+acct.token};
+  const subEl=document.getElementById('gcp-sub');if(subEl)subEl.textContent=acctDesc('gcp',acct);
+  if(mode==='machine'){
+    setLoading('tb-gcp-vm-tbody',9);
+    try{const r=await fetch(`https://compute.googleapis.com/compute/v1/projects/${acct.project}/aggregated/instances`,{headers:H});if(!r.ok){const j=await r.json();throw new Error(j.error?.message||'HTTP '+r.status);}const j=await r.json();const inst=[];Object.values(j.items||{}).forEach(z=>(z.instances||[]).forEach(i=>inst.push(i)));d.computeInst=inst;renderGCPInst(inst,acct);document.getElementById('tc-gcp-vm').textContent=inst.length;ok++;}catch(e){setEmpty('tb-gcp-vm-tbody',9,'Instances: '+e.message.slice(0,60));}
+    return ok;
+  }
+  setLoading('tb-gcp-sa-tbody',5);setLoading('tb-gcp-b-tbody',5);setLoading('tb-gcp-r-tbody',5);
+  try{const r=await fetch(`https://iam.googleapis.com/v1/projects/${acct.project}/serviceAccounts?pageSize=100`,{headers:H});if(!r.ok){const j=await r.json();throw new Error(j.error?.message||'HTTP '+r.status);}const j=await r.json();d.sa=j.accounts||[];renderGCPSAs(d.sa,acct);document.getElementById('tc-gcp-sa').textContent=d.sa.length;ok++;}catch(e){setEmpty('tb-gcp-sa-tbody',5,'SA: '+e.message.slice(0,60));}
+  try{const r=await fetch(`https://cloudresourcemanager.googleapis.com/v1/projects/${acct.project}:getIamPolicy`,{method:'POST',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({options:{requestedPolicyVersion:3}})});if(!r.ok)throw new Error('Policy HTTP '+r.status);const j=await r.json();d.iamPolicy=j.bindings||[];renderGCPBindings(d.iamPolicy,acct);document.getElementById('tc-gcp-b').textContent=d.iamPolicy.length;ok++;}catch(e){setEmpty('tb-gcp-b-tbody',5,'Bindings: '+e.message.slice(0,60));}
+  try{const r=await fetch(`https://iam.googleapis.com/v1/projects/${acct.project}/roles?pageSize=100&view=FULL`,{headers:H});if(!r.ok)throw new Error('Roles HTTP '+r.status);const j=await r.json();d.roles=j.roles||[];renderGCPRoles(d.roles,acct);document.getElementById('tc-gcp-r').textContent=d.roles.length;ok++;}catch(e){setEmpty('tb-gcp-r-tbody',5,'Roles: '+e.message.slice(0,60));}
+  return ok;
+}
+function renderGCPSAs(sas,acct){
+  const tb=document.getElementById('tb-gcp-sa-tbody');if(!sas.length){setEmpty('tb-gcp-sa-tbody',5,'No SAs');return;}
+  tb.innerHTML=sas.map(sa=>{const score=rs({serviceWithAdmin:(sa.email||'').includes('admin')});
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...sa,_cloud:'gcp',_type:'human_sa',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia" style="background:var(--gcp)">${(sa.name||'?').split('/').pop().slice(0,2).toUpperCase()}</div><div><div class="in2">${trunc((sa.name||'').split('/').pop(),26)}</div><div class="is2">Service Account</div></div></div></td>
+      <td><span class="mono">${trunc(sa.email||'—',32)}</span></td>
+      <td>${sa.disabled?'<span class="b bgy">Yes</span>':'<span class="b bsu">No</span>'}</td>
+      <td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+const HR_GCP=['roles/owner','roles/editor','roles/iam.securityAdmin','roles/resourcemanager.organizationAdmin'];
+function renderGCPBindings(bindings,acct){
+  const tb=document.getElementById('tb-gcp-b-tbody');if(!bindings.length){setEmpty('tb-gcp-b-tbody',5,'No bindings');return;}
+  tb.innerHTML=bindings.map(b=>{const hr=HR_GCP.some(r=>b.role===r);const pub=(b.members||[]).includes('allUsers');const score=rs({admin:hr,wildcard:pub});
+    return `<tr><td><span class="mono">${b.role||'—'}</span>${hr?'<span class="b bcr" style="margin-left:4px;font-size:9px">HIGH-RISK</span>':''}</td><td class="mono" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(b.members||[]).join(', ')}</td><td style="font-weight:700">${(b.members||[]).length}</td><td>${rring(score)}</td><td>${abadge(acct)}</td></tr>`;
+  }).join('');
+}
+function renderGCPRoles(roles,acct){
+  const tb=document.getElementById('tb-gcp-r-tbody');if(!roles.length){setEmpty('tb-gcp-r-tbody',5,'No custom roles');return;}
+  tb.innerHTML=roles.map(r=>`<tr><td><span class="mono">${(r.name||'').split('/').pop()}</span></td><td>${r.title||'—'}</td><td><span class="b bgy">${r.stage||'—'}</span></td><td class="mono">${(r.includedPermissions||[]).length} perms</td><td>${abadge(acct)}</td></tr>`).join('');
+}
+function renderGCPInst(instances,acct){
+  const tb=document.getElementById('tb-gcp-vm-tbody');document.getElementById('tc-gcp-vm').textContent=instances.length;
+  if(!instances.length){setEmpty('tb-gcp-vm-tbody',9,'No instances');return;}
+  tb.innerHTML=instances.map(i=>{
+    const sa=(i.serviceAccounts||[])[0];const natIP=(i.networkInterfaces||[]).flatMap(ni=>(ni.accessConfigs||[]).map(ac=>ac.natIP)).filter(Boolean)[0]||null;
+    const isDefSA=sa?.email?.endsWith('compute@developer.gserviceaccount.com');const isAdmin=(sa?.email||'').includes('admin');
+    const hasCloudPlatform=(sa?.scopes||[]).includes('https://www.googleapis.com/auth/cloud-platform');
+    const f={pubIP:!!natIP,machRole:!!sa,defaultSA:isDefSA,machAdmin:isAdmin,machWild:hasCloudPlatform};const score=rs(f);
+    const lvl=rl(score);const ac={cr:'#dc2626',hi:'#ea580c',me:'#d97706',lo:'#16a34a'}[lvl];
+    const zone=(i.zone||'').split('/').pop();const mtype=(i.machineType||'').split('/').pop();
+    return `<tr onclick="showDetail(${ek(JSON.stringify({name:i.name,zone,machineType:mtype,status:i.status,serviceAccount:sa?.email||'None',publicIP:natIP||'None',_cloud:'gcp',_type:'machine_compute',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia mach" style="background:${ac}">${(i.name||'VM').slice(0,2).toUpperCase()}</div><div><div class="in2">${trunc(i.name||'—',22)}</div><div class="is2">${zone}</div></div></div></td>
+      <td><span class="b bgy">${zone}</span></td><td><span class="b bgy">${mtype||'—'}</span></td>
+      <td><span class="b ${i.status==='RUNNING'?'bsu':'bgy'}">${i.status||'—'}</span></td>
+      <td>${sa?`<span class="mono">${trunc(sa.email,24)}</span>${isDefSA?'<span class="rfb rfw" style="margin-left:3px">DEFAULT</span>':''}`: '<span class="b bgy">None</span>'}</td>
+      <td>${natIP?`<span class="rfb rfp">${natIP}</span>`:'<span class="b blo">Private</span>'}</td>
+      <td>${rfbadges(f)}</td><td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ OCI ═══
+async function fetchOCI(acct,mode){
+  const d=S.data[acct.id];let ok=0;
+  const idBase=`https://identity.${acct.region||'eu-amsterdam-1'}.oci.oraclecloud.com/20160918`;
+  const compBase=`https://iaas.${acct.region||'eu-amsterdam-1'}.oraclecloud.com/20160918`;
+  const H={Authorization:'Bearer '+acct.token};const cid=acct.compartment||acct.tenancy;
+  const subEl=document.getElementById('oci-sub');if(subEl)subEl.textContent=acctDesc('oci',acct);
+  if(mode==='machine'){
+    setLoading('tb-oci-vm-tbody',8);setLoading('tb-oci-dg-tbody',6);
+    try{const r=await fetch(`${compBase}/instances?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok){const j=await r.json();throw new Error(j.message||'Compute HTTP '+r.status);}const j=await r.json();d.instances=j;renderOCIInst(j,acct);document.getElementById('tc-oci-vm').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-vm-tbody',8,'Instances: '+e.message.slice(0,60));}
+    try{const r=await fetch(`${idBase}/dynamicGroups?compartmentId=${encodeURIComponent(acct.tenancy)}&limit=100`,{headers:H});if(!r.ok)throw new Error('DynGroups HTTP '+r.status);const j=await r.json();d.dynGroups=j;renderOCIDynGroups(j,acct);document.getElementById('tc-oci-dg').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-dg-tbody',6,'DynGroups: '+e.message.slice(0,60));}
+    return ok;
+  }
+  setLoading('tb-oci-u-tbody',7);setLoading('tb-oci-g-tbody',5);setLoading('tb-oci-p-tbody',6);setLoading('tb-oci-c-tbody',6);
+  try{const r=await fetch(`${idBase}/users?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok){const j=await r.json();throw new Error(j.message||'Users HTTP '+r.status);}const j=await r.json();d.users=j;renderOCIUsers(j,acct);document.getElementById('tc-oci-u').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-u-tbody',7,'Users: '+e.message.slice(0,60));}
+  try{const r=await fetch(`${idBase}/groups?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok)throw new Error('Groups HTTP '+r.status);const j=await r.json();d.groups=j;renderOCIGroups(j,acct);document.getElementById('tc-oci-g').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-g-tbody',5,'Groups: '+e.message.slice(0,60));}
+  try{const r=await fetch(`${idBase}/policies?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok)throw new Error('Policies HTTP '+r.status);const j=await r.json();d.policies=j;renderOCIPolicies(j,acct);document.getElementById('tc-oci-p').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-p-tbody',6,'Policies: '+e.message.slice(0,60));}
+  try{const r=await fetch(`${idBase}/compartments?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok)throw new Error('Comps HTTP '+r.status);const j=await r.json();d.compartments=j;renderOCIComps(j,acct);document.getElementById('tc-oci-c').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-c-tbody',6,'Comps: '+e.message.slice(0,60));}
+  return ok;
+}
+function renderOCIUsers(users,acct){
+  const tb=document.getElementById('tb-oci-u-tbody');if(!users.length){setEmpty('tb-oci-u-tbody',7,'No users');return;}
+  tb.innerHTML=users.map(u=>{const f={noMFA:!u.isMfaActivated,dormant:!u.lastSuccessfulLoginTime&&u.lifecycleState==='ACTIVE'};const score=rs(f);const ac=['#7c3aed','#dc2626','#d97706','#0078d4'][Math.abs((u.name||'').charCodeAt(0)||0)%4];
+    return `<tr onclick="showDetail(${ek(JSON.stringify({...u,_cloud:'oci',_type:'human',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia" style="background:${ac}">${(u.name||'?').slice(0,2).toUpperCase()}</div><div><div class="in2">${u.name||'—'}</div><div class="is2">${trunc(u.id||'',26)}</div></div></div></td>
+      <td class="mono">${u.email||'—'}</td>
+      <td><span class="b ${u.lifecycleState==='ACTIVE'?'bsu':'bgy'}">${u.lifecycleState||'—'}</span></td>
+      <td>${u.isMfaActivated?'<span class="b bsu">Active</span>':'<span class="b bcr">Inactive</span>'}</td>
+      <td class="mono">${fmtD(u.timeCreated)}</td><td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderOCIGroups(groups,acct){const tb=document.getElementById('tb-oci-g-tbody');if(!groups.length){setEmpty('tb-oci-g-tbody',5,'No groups');return;}tb.innerHTML=groups.map(g=>`<tr><td><div class="in2">${g.name||'—'}</div></td><td class="mono">${trunc(g.description||'—',32)}</td><td><span class="b bgy">${g.lifecycleState||'—'}</span></td><td class="mono">${fmtD(g.timeCreated)}</td><td>${abadge(acct)}</td></tr>`).join('');}
+function renderOCIPolicies(policies,acct){const tb=document.getElementById('tb-oci-p-tbody');if(!policies.length){setEmpty('tb-oci-p-tbody',6,'No policies');return;}
+  tb.innerHTML=policies.map(p=>{const admin=(p.statements||[]).some(s=>s.toLowerCase().includes('manage all-resources'));const score=rs({admin,wildcard:admin});
+    return `<tr><td><div class="in2">${p.name||'—'}</div></td><td class="mono" style="font-size:10px">${(p.statements||[]).slice(0,2).map(s=>trunc(s,45)).join('<br>')}</td><td><span class="mono">${trunc(p.compartmentId||'',26)}</span></td><td class="mono">${fmtD(p.timeCreated)}</td><td>${rring(score)}</td><td>${abadge(acct)}</td></tr>`;
+  }).join('');
+}
+function renderOCIComps(comps,acct){const tb=document.getElementById('tb-oci-c-tbody');if(!comps.length){setEmpty('tb-oci-c-tbody',6,'No compartments');return;}tb.innerHTML=comps.map(c=>`<tr><td><div class="in2">${c.name||'—'}</div></td><td class="mono">${trunc(c.description||'—',30)}</td><td><span class="mono">${trunc(c.id||'',30)}</span></td><td><span class="b bgy">${c.lifecycleState||'—'}</span></td><td class="mono">${fmtD(c.timeCreated)}</td><td>${abadge(acct)}</td></tr>`).join('');}
+function renderOCIInst(instances,acct){
+  const tb=document.getElementById('tb-oci-vm-tbody');document.getElementById('tc-oci-vm').textContent=instances.length;
+  if(!instances.length){setEmpty('tb-oci-vm-tbody',8,'No instances');return;}
+  tb.innerHTML=instances.map(i=>{const hasPub=!!i.primaryPublicIpAddress;const f={pubIP:hasPub,stale:i.lifecycleState==='STOPPED'};const score=rs(f);const lvl=rl(score);const ac={cr:'#dc2626',hi:'#ea580c',me:'#d97706',lo:'#16a34a'}[lvl];
+    return `<tr onclick="showDetail(${ek(JSON.stringify({name:i.displayName,shape:i.shape,state:i.lifecycleState,compartmentId:i.compartmentId,_cloud:'oci',_type:'machine_instance',_acct:acct.name}))})">
+      <td><div class="ic"><div class="ia mach" style="background:${ac}">${(i.displayName||'OC').slice(0,2).toUpperCase()}</div><div><div class="in2">${trunc(i.displayName||'—',22)}</div><div class="is2">${trunc(i.id||'',26)}</div></div></div></td>
+      <td><span class="b bgy">${i.shape||'—'}</span></td>
+      <td><span class="b ${i.lifecycleState==='RUNNING'?'bsu':'bgy'}">${i.lifecycleState||'—'}</span></td>
+      <td>—</td>
+      <td>${hasPub?`<span class="rfb rfp">${i.primaryPublicIpAddress}</span>`:'<span class="b blo">Private</span>'}</td>
+      <td>${rfbadges(f)}</td><td>${rring(score)}</td><td>${abadge(acct)}</td>
+    </tr>`;
+  }).join('');
+}
+function renderOCIDynGroups(groups,acct){
+  const tb=document.getElementById('tb-oci-dg-tbody');document.getElementById('tc-oci-dg').textContent=groups.length;
+  if(!groups.length){setEmpty('tb-oci-dg-tbody',6,'No dynamic groups');return;}
+  tb.innerHTML=groups.map(g=>{const admin=(g.matchingRule||'').toLowerCase().includes('any {');const score=rs({admin});
+    return `<tr><td><div class="ic"><div class="ia mach" style="background:var(--mach)">${(g.name||'DG').slice(0,2).toUpperCase()}</div><div><div class="in2">${g.name||'—'}</div><div class="is2">Dynamic Group</div></div></div></td><td><span class="mono" style="font-size:10px">${trunc(g.matchingRule||'—',44)}</span></td><td class="mono">${trunc(g.description||'—',30)}</td><td><span class="b bgy">${g.lifecycleState||'—'}</span></td><td>${rring(score)}</td><td>${abadge(acct)}</td></tr>`;
+  }).join('');
+}
+
+// ═══ DETAIL PANEL ═══
+function showDetail(d){
+  const isMach=d._type?.startsWith('machine');
+  const typeLabels={machine_ec2:'EC2 Instance',machine_lambda:'Lambda Function',machine_vm:'Azure VM',machine_mi:'Managed Identity',machine_compute:'GCP Compute Instance',machine_instance:'OCI Instance',human:'Human User',human_role:'IAM Role',human_sp:'Service Principal',human_sa:'Service Account'};
+  document.getElementById('dp-title').innerHTML=`<span class="b ${isMach?'bmach':'bhuman'}">${isMach?'Machine':'Human'} Identity</span>`;
+  const nm=d.UserName||d.displayName||d.name||d.Name||d.FunctionName||'Identity';
+  const machRole=d.IamProfile||d.Role||d.serviceAccount||d.identityType||'—';
+  const pubIP=d.PublicIp||d.publicIP||d.primaryPublicIpAddress||null;
+  const score=rs({pubIP:!!pubIP,machRole:!!machRole&&machRole!=='—',machAdmin:(machRole||'').toLowerCase().includes('admin'),noMFA:d.isMfaActivated===false,root:d.Arn?.includes(':root'),dormant:!d.PasswordLastUsed&&!d.signInActivity?.lastSignInDateTime&&!d.timeCreated});
+  const kvs=Object.entries(d).filter(([k])=>!k.startsWith('_')&&typeof d[k]!=='object'&&d[k]!='').map(([k,v])=>`<div class="kv"><span class="kk">${k}</span><span class="kv2">${trunc(String(v),38)}</span></div>`).join('');
+  const chain=isMach?`<div class="chain"><span class="cn cn-vm">&#x1F5A5; ${trunc(nm,18)}</span><span class="ca">&#x2192;</span><span class="cn cn-role">${trunc(machRole,18)}</span><span class="ca">&#x2192;</span><span class="cn cn-pol">IAM Policies</span><span class="ca">&#x2192;</span><span class="cn cn-res">Resources</span></div>`:`<div class="chain"><span class="cn cn-vm">&#x1F464; ${trunc(nm,18)}</span><span class="ca">&#x2192;</span><span class="cn cn-role">Groups / Roles</span><span class="ca">&#x2192;</span><span class="cn cn-pol">Policies</span><span class="ca">&#x2192;</span><span class="cn cn-res">Resources</span></div>`;
+  const riskFactors=[];
+  if(pubIP)riskFactors.push(`<div class="rfbox rfhi"><div class="rftitle">&#x26A0; Public IP Exposed</div><div class="rfdesc">Instance is internet-accessible at ${pubIP} — lateral movement risk if credentials are compromised.</div></div>`);
+  if((machRole||'').toLowerCase().includes('admin'))riskFactors.push(`<div class="rfbox rfcr"><div class="rftitle">&#x1F6A8; Admin Role Attached</div><div class="rfdesc">Machine identity has administrative permissions — principle of least privilege violated.</div></div>`);
+  if(d.isMfaActivated===false)riskFactors.push(`<div class="rfbox rfcr"><div class="rftitle">&#x26D4; MFA Not Active</div><div class="rfdesc">User account has no MFA — single factor authentication is insufficient for privileged access.</div></div>`);
+  if(d.mfa_active==='false')riskFactors.push(`<div class="rfbox rfcr"><div class="rftitle">&#x26D4; MFA Inactive (Credential Report)</div><div class="rfdesc">AWS credential report shows MFA is not active for this user.</div></div>`);
+  document.getElementById('dp-body').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      ${rring(score)}<div><div class="in2">${nm}</div><div class="is2">${typeLabels[d._type]||d._type||'Identity'} · ${d._cloud?.toUpperCase()} · ${d._acct}</div></div>
+    </div>
+    <div style="margin-bottom:12px">${chain}</div>
+    ${riskFactors.length?'<div class="slbl">Risk Factors</div>'+riskFactors.join(''):''}
+    <div class="slbl" style="margin-top:12px">All Properties</div>
+    ${kvs}`;
+  document.getElementById('dp-foot').innerHTML=`
+    <button class="btn btn-p btn-sm" onclick="toast('Access review initiated for ${nm.replace(/'/g,"\\'")}','success');closeDP()">Initiate Review</button>
+    <button class="btn btn-o btn-sm" onclick="navigator.clipboard?.writeText(JSON.stringify(${JSON.stringify(d).replace(/"/g,"'")}))?.then(()=>toast('Copied','success'))">Copy JSON</button>`;
+  document.getElementById('dp').classList.add('open');
+}
+function closeDP(){document.getElementById('dp').classList.remove('open');}
+
+// ═══ RISK ENGINE ═══
+function computeRisk(){
+  const findings=[];
+  S.accounts.aws.forEach(acct=>{
+    const d=S.data[acct.id]||{};
+    (d.credReport||[]).forEach(u=>{
+      if(u.mfa_active==='false'&&u.user!=='<root_account>')findings.push({cloud:'aws',acct:acct.name,identity:u.user,idType:'human',finding:'MFA Inactive',score:70,detail:`User ${u.user} has no MFA. Single-factor auth is insufficient for cloud access.`});
+      if(u.access_key_1_active==='true'&&(!u.access_key_1_last_used_date||u.access_key_1_last_used_date==='N/A'))findings.push({cloud:'aws',acct:acct.name,identity:u.user,idType:'human',finding:'Active key never used',score:30,detail:'Access key is active but never used. Deactivate to reduce attack surface.'});
+    });
+    (d.ec2||[]).forEach(i=>{
+      if(i.PublicIp&&i.IamProfile)findings.push({cloud:'aws',acct:acct.name,identity:i.Name||i.InstanceId,idType:'machine',finding:'EC2 with Public IP + IAM Role',score:60,detail:`Instance ${i.InstanceId} is internet-accessible and has IAM role: ${i.IamProfile.split('/').pop()}`});
+      if(!i.IamProfile&&i.State==='running')findings.push({cloud:'aws',acct:acct.name,identity:i.Name||i.InstanceId,idType:'machine',finding:'Running EC2 without instance profile',score:15,detail:'Workload has no IAM identity attached — ensure least-privilege access only.'});
+    });
+    (d.lambda||[]).forEach(f=>{if((f.Role||'').toLowerCase().includes('admin'))findings.push({cloud:'aws',acct:acct.name,identity:f.Name,idType:'machine',finding:'Lambda with admin execution role',score:80,detail:`Function ${f.Name} has admin role: ${f.Role.split('/').pop()} — excessive privilege.`});});
+  });
+  S.accounts.azure.forEach(acct=>{
+    const d=S.data[acct.id]||{};
+    (d.roleAssignments||[]).filter(r=>(r.properties?.roleDefinitionId||'').includes('8e3af657')).forEach(r=>findings.push({cloud:'azure',acct:acct.name,identity:r.properties?.principalId,idType:'human',finding:'Owner role at subscription scope',score:95,detail:'Owner = full control. Apply least-privilege immediately.'}));
+    (d.vms||[]).forEach(vm=>{if(vm.identity?.type?.includes('SystemAssigned'))findings.push({cloud:'azure',acct:acct.name,identity:vm.name,idType:'machine',finding:'VM with System-Assigned MI',score:35,detail:`Verify role assignments for managed identity of VM ${vm.name}.`});});
+  });
+  S.accounts.gcp.forEach(acct=>{
+    const d=S.data[acct.id]||{};
+    (d.iamPolicy||[]).filter(b=>HR_GCP.includes(b.role)).forEach(b=>(b.members||[]).forEach(m=>findings.push({cloud:'gcp',acct:acct.name,identity:m,idType:'human',finding:`High-risk role: ${b.role}`,score:85,detail:`${m} bound to ${b.role}`})));
+    (d.computeInst||[]).forEach(i=>{const sa=(i.serviceAccounts||[])[0];if(sa?.email?.endsWith('compute@developer.gserviceaccount.com'))findings.push({cloud:'gcp',acct:acct.name,identity:i.name,idType:'machine',finding:'Default Compute Service Account',score:45,detail:'Using default SA is an anti-pattern. Create a custom SA with minimal permissions.'});});
+  });
+  S.accounts.oci.forEach(acct=>{
+    const d=S.data[acct.id]||{};
+    (d.users||[]).filter(u=>!u.isMfaActivated&&u.lifecycleState==='ACTIVE').forEach(u=>findings.push({cloud:'oci',acct:acct.name,identity:u.name,idType:'human',finding:'MFA not activated',score:70,detail:`OCI user ${u.name} is active without MFA.`}));
+    (d.policies||[]).filter(p=>(p.statements||[]).some(s=>s.toLowerCase().includes('manage all-resources'))).forEach(p=>findings.push({cloud:'oci',acct:acct.name,identity:p.name,idType:'machine',finding:'Wildcard policy — manage all-resources',score:90,detail:'Overly broad policy grants full resource management.'}));
+  });
+  S.findings=findings;
+  document.getElementById('risk-n').textContent=findings.filter(f=>f.score>=70).length;
+  renderRisk(findings);
+}
+
+function renderRisk(findings){
+  const el=document.getElementById('risk-body');
+  if(!findings.length){el.innerHTML='<div class="al alsu">No risk findings — pull data from providers first or no issues detected.</div>';return;}
+  findings.sort((a,b)=>b.score-a.score);
+  const hum=findings.filter(f=>f.idType==='human').length;
+  const mach=findings.filter(f=>f.idType==='machine').length;
+  const crit=findings.filter(f=>f.score>=70).length;
+  const high=findings.filter(f=>f.score>=45&&f.score<70).length;
+  const rows=findings.map(f=>{const cl={aws:'ct-aws',azure:'ct-az',gcp:'ct-gcp',oci:'ct-oci'}[f.cloud]||'';
+    return `<tr><td><span class="ct3 ${cl}">${f.cloud.toUpperCase()}</span></td><td class="mono" style="font-size:10px">${trunc(f.acct,18)}</td><td><span class="b ${f.idType==='human'?'bhuman':'bmach'}">${f.idType}</span></td><td><div class="in2">${trunc(f.identity||'—',24)}</div></td><td style="font-weight:600">${f.finding}</td><td>${rring(f.score)}</td><td class="mono" style="font-size:11px;color:var(--mu)">${trunc(f.detail,55)}</td></tr>`;
+  }).join('');
+  el.innerHTML=`<div class="g5 mb">
+    <div class="stat sp"><div class="sl">Total Findings</div><div class="sv">${findings.length}</div></div>
+    <div class="stat sr"><div class="sl">Critical (&#x2265;70)</div><div class="sv" style="color:var(--red)">${crit}</div></div>
+    <div class="stat sa"><div class="sl">High (45-69)</div><div class="sv" style="color:var(--orange)">${high}</div></div>
+    <div class="stat sp"><div class="sl">Human Identity</div><div class="sv" style="color:var(--human)">${hum}</div></div>
+    <div class="stat sm"><div class="sl">Machine Identity</div><div class="sv" style="color:var(--mach)">${mach}</div></div>
+  </div>
+  <div class="card"><div class="ch"><div class="ct2">All Risk Findings (${findings.length})</div><button class="btn btn-o btn-sm" onclick="exportD('risk_findings','risk_findings.json')">Export</button></div>
+  <div class="tw"><table class="t"><thead><tr><th>Cloud</th><th>Account</th><th>Type</th><th>Identity</th><th>Finding</th><th>Score</th><th>Detail</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  window['risk_findings']=findings;
+}
+
+// ═══ OVERVIEW STATS ═══
+function refreshOv(){
+  let hum=0,mach=0,crit=0;
+  ['aws','azure','gcp','oci'].forEach(p=>{
+    S.accounts[p].forEach(acct=>{
+      const d=S.data[acct.id]||{};
+      if(p==='aws'){hum+=(d.users||[]).length;mach+=(d.ec2||[]).length+(d.lambda||[]).length;crit+=(d.credReport||[]).filter(u=>u.mfa_active==='false').length;}
+      else if(p==='azure'){hum+=(d.users||[]).length+(d.sps||[]).length;mach+=(d.vms||[]).length;}
+      else if(p==='gcp'){hum+=(d.sa||[]).length;mach+=(d.computeInst||[]).length;}
+      else if(p==='oci'){hum+=(d.users||[]).length;mach+=(d.instances||[]).length;}
+    });
+    updateOvCard(p);
+  });
+  document.getElementById('ov-accts').textContent=Object.values(S.accounts).flat().length;
+  document.getElementById('ov-human').textContent=hum||'—';
+  document.getElementById('ov-mach').textContent=mach||'—';
+  document.getElementById('ov-crit').textContent=crit||'—';
+  if(hum+mach>0)document.getElementById('ag-status').textContent=`${Object.values(S.accounts).flat().length} accounts scanned · ${hum} human + ${mach} machine identities`;
+}
+
+function updateOvCard(p){
+  const key=p==='azure'?'az':p;
+  const sEl=document.getElementById(`ov-${key}-s`);const bEl=document.getElementById(`ov-${key}-b`);
+  if(!sEl||!bEl)return;
+  const accts=S.accounts[p]||[];
+  if(!accts.length){sEl.className='b bgy';sEl.textContent='0 accounts';bEl.innerHTML='<div class="es"><p>No accounts configured</p></div>';return;}
+  const wd=accts.filter(a=>S.data[a.id]&&Object.keys(S.data[a.id]).length>0);
+  sEl.className=wd.length?'b bsu':'b bme';sEl.textContent=`${accts.length} acct${accts.length>1?'s':''} · ${wd.length} with data`;
+  const tot=accts.reduce((s,a)=>{const d=S.data[a.id]||{};if(p==='aws')return s+(d.users||[]).length+(d.ec2||[]).length+(d.lambda||[]).length;if(p==='azure')return s+(d.users||[]).length+(d.sps||[]).length+(d.vms||[]).length;if(p==='gcp')return s+(d.sa||[]).length+(d.computeInst||[]).length;if(p==='oci')return s+(d.users||[]).length+(d.instances||[]).length;return s;},0);
+  bEl.innerHTML=`<div style="font-size:22px;font-weight:800;color:var(--tx);margin-bottom:10px">${tot} <span style="font-size:12px;font-weight:500;color:var(--mu)">identities</span></div>${accts.map(a=>{const d=S.data[a.id]||{};const has=Object.keys(d).length>0;return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 7px;background:var(--sf2);border-radius:var(--rs);font-size:11px;margin-bottom:5px"><span style="font-weight:600">${trunc(a.name,22)}</span><span class="b ${has?'bsu':'bgy'}">${has?'Data pulled':'No data'}</span></div>`;}).join('')}<div style="margin-top:8px"><a href="#" onclick="nav('${p}',null);return false" class="btn btn-o btn-sm" style="font-size:11px;width:100%;justify-content:center">View Details &#x2192;</a></div>`;
+}
+
+// ═══ UTILITIES ═══
+function srch(dataKey,q,tbodyId,renderFn){const data=window[dataKey]||[];renderFn(data.filter(item=>JSON.stringify(item).toLowerCase().includes(q.toLowerCase())));}
+function exportD(key,filename){const data=window[key]||S.findings||[];if(!data.length){toast('No data','warn');return;}const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();toast(`Exported ${data.length} records`,'success');}
+function exportAll(){const blob=new Blob([JSON.stringify({accounts:S.accounts,data:S.data,findings:S.findings},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='anugal_ciem_full.json';a.click();toast('Full export downloaded','success');}
+function clearAll(){if(!confirm('Clear ALL accounts and data?'))return;S.accounts={aws:[],azure:[],gcp:[],oci:[]};S.data={};S.selected={};S.findings=[];localStorage.removeItem('anugal_ciem_v2');renderAllLists();updateCounts();updateDots();refreshOv();toast('Cleared','warn');}
+async function refreshAll(){const all=Object.entries(S.accounts).flatMap(([p,accts])=>accts.map(a=>({p,a})));if(!all.length){toast('No accounts configured','warn');return;}toast(`Scanning ${all.length} accounts…`,'info');for(const {p,a} of all){S.selected[p]=a.id;await fetchCloud(p).catch(e=>console.warn(p,a.name,e));}computeRisk();refreshOv();toast('All accounts scanned','success');}
+</script>
+</body>
+</html>
