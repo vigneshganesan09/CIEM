@@ -26,7 +26,7 @@
   --fn:'Plus Jakarta Sans',sans-serif;--mo:'DM Mono',monospace;
   --r:8px;--rs:5px;--rl:12px;
 }
-body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh;display:flex;overflow:hidden;font-size:13px}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh;display:flex;font-size:13px}
 .sidebar{width:var(--sb);min-height:100vh;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;position:fixed;inset:0 auto 0 0;z-index:100;overflow-y:auto}
 .logo{padding:15px 16px 12px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:9px}
 .lm{width:27px;height:27px;background:linear-gradient(135deg,var(--ps),#a78bfa);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -51,7 +51,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .av{width:27px;height:27px;border-radius:50%;background:var(--ps);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
 .un{font-size:11px;font-weight:600;color:rgba(255,255,255,.78)}
 .uro{font-size:9px;color:rgba(255,255,255,.28)}
-.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-height:100vh;overflow-y:auto}
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;height:100vh;overflow-y:auto}
 .topbar{height:var(--tb);background:var(--sf);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50}
 .bc{font-size:12px;color:var(--mu);display:flex;align-items:center;gap:5px}
 .bc strong{color:var(--tx);font-weight:700}
@@ -861,8 +861,16 @@ async function awsEC2call(action,params,cfg){
 }
 async function awsLambdaCall(cfg){
   const region=cfg.region||'us-east-1';
-  const r=await awsSigned('GET','lambda',region,`https://lambda.${region}.amazonaws.com/2015-03-31/functions`,{MaxItems:100},cfg);
-  return r.json();
+  let lmbAll=[], lmbMk=null;
+  do {
+    const params={MaxItems:50};
+    if(lmbMk) params.Marker=lmbMk;
+    const r=await awsSigned('GET','lambda',region,`https://lambda.${region}.amazonaws.com/2015-03-31/functions`,params,cfg);
+    const j=await r.json();
+    lmbAll=lmbAll.concat(j.Functions||[]);
+    lmbMk=j.NextMarker||null;
+  } while(lmbMk);
+  return {Functions:lmbAll};
 }
 
 // ═══ FETCH ORCHESTRATORS ═══
@@ -899,8 +907,8 @@ async function fetchAWS(acct,mode){
   setLoading('tb-aws-u-tbody',7);setLoading('tb-aws-r-tbody',7);setLoading('tb-aws-p-tbody',5);setLoading('tb-aws-g-tbody',5);setLoading('tb-aws-cr-tbody',8);
   try{let us=[],mk=null;do{const p2={MaxItems:100};if(mk)p2.Marker=mk;const doc=await awsIAM('ListUsers',p2,acct);xmlNs(doc,'member').forEach(u=>us.push({UserName:xmlV(u,'UserName'),Arn:xmlV(u,'Arn'),CreateDate:xmlV(u,'CreateDate'),PasswordLastUsed:xmlV(u,'PasswordLastUsed')}));mk=xmlV(doc.documentElement,'IsTruncated')==='true'?xmlV(doc.documentElement,'Marker'):null;}while(mk);d.users=us;renderAWSUsers(us,acct);window['aws-users']=us;document.getElementById('tc-aws-u').textContent=us.length;ok++;}catch(e){setEmpty('tb-aws-u-tbody',7,'Users: '+e.message.slice(0,60));}
   try{let rs=[],mk=null;do{const p2={MaxItems:100};if(mk)p2.Marker=mk;const doc=await awsIAM('ListRoles',p2,acct);xmlNs(doc,'member').forEach(r=>rs.push({RoleName:xmlV(r,'RoleName'),Arn:xmlV(r,'Arn'),CreateDate:xmlV(r,'CreateDate'),Description:xmlV(r,'Description'),MaxSessionDuration:xmlV(r,'MaxSessionDuration')}));mk=xmlV(doc.documentElement,'IsTruncated')==='true'?xmlV(doc.documentElement,'Marker'):null;}while(mk);d.roles=rs;renderAWSRoles(rs,acct);document.getElementById('tc-aws-r').textContent=rs.length;ok++;}catch(e){setEmpty('tb-aws-r-tbody',7,'Roles: '+e.message.slice(0,60));}
-  try{const doc=await awsIAM('ListPolicies',{Scope:'Local',MaxItems:100},acct);const ps=xmlNs(doc,'member').map(p=>({PolicyName:xmlV(p,'PolicyName'),Arn:xmlV(p,'Arn'),AttachmentCount:xmlV(p,'AttachmentCount'),UpdateDate:xmlV(p,'UpdateDate')}));d.policies=ps;renderAWSPolicies(ps,acct);document.getElementById('tc-aws-p').textContent=ps.length;ok++;}catch(e){setEmpty('tb-aws-p-tbody',5,'Policies: '+e.message.slice(0,60));}
-  try{const doc=await awsIAM('ListGroups',{MaxItems:100},acct);const gs=xmlNs(doc,'member').map(g=>({GroupName:xmlV(g,'GroupName'),Arn:xmlV(g,'Arn'),Path:xmlV(g,'Path'),CreateDate:xmlV(g,'CreateDate')}));d.groups=gs;renderAWSGroups(gs,acct);document.getElementById('tc-aws-g').textContent=gs.length;ok++;}catch(e){setEmpty('tb-aws-g-tbody',5,'Groups: '+e.message.slice(0,60));}
+  try{let pmk=null,ps=[];do{const pdoc=await awsIAM('ListPolicies',{Scope:'Local',MaxItems:200,...(pmk?{Marker:pmk}:{})},acct);xmlNs(pdoc,'member').forEach(p=>ps.push({PolicyName:xmlV(p,'PolicyName'),Arn:xmlV(p,'Arn'),AttachmentCount:xmlV(p,'AttachmentCount'),UpdateDate:xmlV(p,'UpdateDate')}));pmk=xmlV(pdoc.documentElement,'IsTruncated')==='true'?xmlV(pdoc.documentElement,'Marker'):null;}while(pmk);d.policies=ps;renderAWSPolicies(ps,acct);document.getElementById('tc-aws-p').textContent=ps.length;ok++;}catch(e){setEmpty('tb-aws-p-tbody',5,'Policies: '+e.message.slice(0,60));}
+  try{let gmk=null,gs=[];do{const gdoc=await awsIAM('ListGroups',{MaxItems:200,...(gmk?{Marker:gmk}:{})},acct);xmlNs(gdoc,'member').forEach(g=>gs.push({GroupName:xmlV(g,'GroupName'),Arn:xmlV(g,'Arn'),Path:xmlV(g,'Path'),CreateDate:xmlV(g,'CreateDate')}));gmk=xmlV(gdoc.documentElement,'IsTruncated')==='true'?xmlV(gdoc.documentElement,'Marker'):null;}while(gmk);d.groups=gs;renderAWSGroups(gs,acct);document.getElementById('tc-aws-g').textContent=gs.length;ok++;}catch(e){setEmpty('tb-aws-g-tbody',5,'Groups: '+e.message.slice(0,60));}
   try{try{await awsIAM('GenerateCredentialReport',{},acct);}catch(e){}await new Promise(r=>setTimeout(r,2000));const doc=await awsIAM('GetCredentialReport',{},acct);const raw=atob(xmlV(doc.documentElement,'Content'));const hdr=raw.split('\n')[0].split(',');const rows=raw.split('\n').slice(1).filter(l=>l.trim()).map(l=>{const vs=l.split(',');const o={};hdr.forEach((h,i)=>o[h]=vs[i]||'');return o;});d.credReport=rows;renderCredReport(rows,acct);ok++;}catch(e){setEmpty('tb-aws-cr-tbody',8,'CredReport: '+e.message.slice(0,60));}
   return ok;
 }
@@ -913,8 +921,11 @@ async function fetchEC2(acct){
   return inst;
 }
 async function fetchIPs(acct){
-  const doc=await awsIAM('ListInstanceProfiles',{MaxItems:100},acct);
-  return xmlNs(doc,'member').map(p=>({Name:xmlV(p,'InstanceProfileName'),Arn:xmlV(p,'Arn'),CreateDate:xmlV(p,'CreateDate'),Roles:xmlNs(p,'roles').map(r=>xmlV(r,'RoleName')).filter(Boolean)}));
+  let ipmk=null,ipAll=[];
+  do{const ipdoc=await awsIAM('ListInstanceProfiles',{MaxItems:200,...(ipmk?{Marker:ipmk}:{})},acct);
+  xmlNs(ipdoc,'member').forEach(p=>ipAll.push({Name:xmlV(p,'InstanceProfileName'),Arn:xmlV(p,'Arn'),CreateDate:xmlV(p,'CreateDate'),Roles:xmlNs(p,'roles').map(r=>xmlV(r,'RoleName')).filter(Boolean)}));
+  ipmk=xmlV(ipdoc.documentElement,'IsTruncated')==='true'?xmlV(ipdoc.documentElement,'Marker'):null;}while(ipmk);
+  return ipAll;
 }
 
 // ═══ AWS RENDERERS ═══
@@ -1009,15 +1020,15 @@ async function fetchAzure(acct,mode){
   if(mode==='machine'){
     setLoading('tb-az-vm-tbody',9);setLoading('tb-az-mi-tbody',7);
     if(acct.subId){
-      try{const r=await fetch(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.Compute/virtualMachines?api-version=2023-03-01`,{headers:{Authorization:'Bearer '+at}});if(!r.ok)throw new Error('VMs HTTP '+r.status);const j=await r.json();d.vms=j.value||[];renderAzureVMs(d.vms,acct);document.getElementById('tc-az-vm').textContent=d.vms.length;ok++;}catch(e){setEmpty('tb-az-vm-tbody',9,'VMs: '+e.message.slice(0,60));}
-      try{const r=await fetch(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.ManagedIdentity/userAssignedIdentities?api-version=2023-01-31`,{headers:{Authorization:'Bearer '+at}});if(!r.ok)throw new Error('MI HTTP '+r.status);const j=await r.json();d.managedIds=j.value||[];renderManagedIds(d.managedIds,acct);document.getElementById('tc-az-mi').textContent=d.managedIds.length;ok++;}catch(e){setEmpty('tb-az-mi-tbody',7,'MI: '+e.message.slice(0,60));}
+      try{d.vms=await armPaged(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.Compute/virtualMachines?api-version=2023-03-01`,at);renderAzureVMs(d.vms,acct);document.getElementById('tc-az-vm').textContent=d.vms.length;ok++;}catch(e){setEmpty('tb-az-vm-tbody',9,'VMs: '+e.message.slice(0,60));}
+      try{d.managedIds=await armPaged(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.ManagedIdentity/userAssignedIdentities?api-version=2023-01-31`,at);renderManagedIds(d.managedIds,acct);document.getElementById('tc-az-mi').textContent=d.managedIds.length;ok++;}catch(e){setEmpty('tb-az-mi-tbody',7,'MI: '+e.message.slice(0,60));}
     }return ok;
   }
   setLoading('tb-az-u-tbody',7);setLoading('tb-az-sp-tbody',6);setLoading('tb-az-r-tbody',6);setLoading('tb-az-g-tbody',5);
-  try{const r=await fetch('https://graph.microsoft.com/v1.0/users?$select=id,displayName,userPrincipalName,accountEnabled,jobTitle,department,createdDateTime,signInActivity&$top=100',{headers:{Authorization:'Bearer '+gt}});if(!r.ok){const j=await r.json();throw new Error(j.error?.message||'HTTP '+r.status);}const j=await r.json();d.users=j.value||[];renderAzureUsers(d.users,acct);document.getElementById('tc-az-u').textContent=d.users.length;ok++;}catch(e){setEmpty('tb-az-u-tbody',7,'Users: '+e.message.slice(0,60));}
-  try{const r=await fetch('https://graph.microsoft.com/v1.0/servicePrincipals?$select=id,displayName,appId,servicePrincipalType,accountEnabled&$top=100',{headers:{Authorization:'Bearer '+gt}});if(!r.ok)throw new Error('SP HTTP '+r.status);const j=await r.json();d.sps=j.value||[];renderAzureSPs(d.sps,acct);document.getElementById('tc-az-sp').textContent=d.sps.length;ok++;}catch(e){setEmpty('tb-az-sp-tbody',6,'SPs: '+e.message.slice(0,60));}
-  if(acct.subId){try{const r=await fetch(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.Authorization/roleAssignments?api-version=2022-04-01`,{headers:{Authorization:'Bearer '+at}});if(!r.ok)throw new Error('Roles HTTP '+r.status);const j=await r.json();d.roleAssignments=j.value||[];renderAzureRoles(d.roleAssignments,acct);document.getElementById('tc-az-r').textContent=d.roleAssignments.length;ok++;}catch(e){setEmpty('tb-az-r-tbody',6,'Roles: '+e.message.slice(0,60));}}
-  try{const r=await fetch('https://graph.microsoft.com/v1.0/groups?$select=id,displayName,mail,securityEnabled&$top=100',{headers:{Authorization:'Bearer '+gt}});if(!r.ok)throw new Error('Groups HTTP '+r.status);const j=await r.json();d.groups=j.value||[];renderAzureGroups(d.groups,acct);document.getElementById('tc-az-g').textContent=d.groups.length;ok++;}catch(e){setEmpty('tb-az-g-tbody',5,'Groups: '+e.message.slice(0,60));}
+  try{d.users=await graphPaged('https://graph.microsoft.com/v1.0/users?$select=id,displayName,userPrincipalName,accountEnabled,jobTitle,department,createdDateTime,signInActivity&$top=999',gt);renderAzureUsers(d.users,acct);document.getElementById('tc-az-u').textContent=d.users.length;ok++;}catch(e){setEmpty('tb-az-u-tbody',7,'Users: '+e.message.slice(0,60));}
+  try{d.sps=await graphPaged('https://graph.microsoft.com/v1.0/servicePrincipals?$select=id,displayName,appId,servicePrincipalType,accountEnabled&$top=999',gt);renderAzureSPs(d.sps,acct);document.getElementById('tc-az-sp').textContent=d.sps.length;ok++;}catch(e){setEmpty('tb-az-sp-tbody',6,'SPs: '+e.message.slice(0,60));}
+  if(acct.subId){try{d.roleAssignments=await armPaged(`https://management.azure.com/subscriptions/${acct.subId}/providers/Microsoft.Authorization/roleAssignments?api-version=2022-04-01`,at);renderAzureRoles(d.roleAssignments,acct);document.getElementById('tc-az-r').textContent=d.roleAssignments.length;ok++;}catch(e){setEmpty('tb-az-r-tbody',6,'Roles: '+e.message.slice(0,60));}}
+  try{d.groups=await graphPaged('https://graph.microsoft.com/v1.0/groups?$select=id,displayName,mail,securityEnabled&$top=999',gt);renderAzureGroups(d.groups,acct);document.getElementById('tc-az-g').textContent=d.groups.length;ok++;}catch(e){setEmpty('tb-az-g-tbody',5,'Groups: '+e.message.slice(0,60));}
   return ok;
 }
 function renderAzureUsers(users,acct){
@@ -1096,9 +1107,9 @@ async function fetchGCP(acct,mode){
     return ok;
   }
   setLoading('tb-gcp-sa-tbody',5);setLoading('tb-gcp-b-tbody',5);setLoading('tb-gcp-r-tbody',5);
-  try{const r=await fetch(`https://iam.googleapis.com/v1/projects/${acct.project}/serviceAccounts?pageSize=100`,{headers:H});if(!r.ok){const j=await r.json();throw new Error(j.error?.message||'HTTP '+r.status);}const j=await r.json();d.sa=j.accounts||[];renderGCPSAs(d.sa,acct);document.getElementById('tc-gcp-sa').textContent=d.sa.length;ok++;}catch(e){setEmpty('tb-gcp-sa-tbody',5,'SA: '+e.message.slice(0,60));}
+  try{d.sa=await gcpPaged(`https://iam.googleapis.com/v1/projects/${acct.project}/serviceAccounts?pageSize=100`,acct.token,'accounts');renderGCPSAs(d.sa,acct);document.getElementById('tc-gcp-sa').textContent=d.sa.length;ok++;}catch(e){setEmpty('tb-gcp-sa-tbody',5,'SA: '+e.message.slice(0,60));}
   try{const r=await fetch(`https://cloudresourcemanager.googleapis.com/v1/projects/${acct.project}:getIamPolicy`,{method:'POST',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({options:{requestedPolicyVersion:3}})});if(!r.ok)throw new Error('Policy HTTP '+r.status);const j=await r.json();d.iamPolicy=j.bindings||[];renderGCPBindings(d.iamPolicy,acct);document.getElementById('tc-gcp-b').textContent=d.iamPolicy.length;ok++;}catch(e){setEmpty('tb-gcp-b-tbody',5,'Bindings: '+e.message.slice(0,60));}
-  try{const r=await fetch(`https://iam.googleapis.com/v1/projects/${acct.project}/roles?pageSize=100&view=FULL`,{headers:H});if(!r.ok)throw new Error('Roles HTTP '+r.status);const j=await r.json();d.roles=j.roles||[];renderGCPRoles(d.roles,acct);document.getElementById('tc-gcp-r').textContent=d.roles.length;ok++;}catch(e){setEmpty('tb-gcp-r-tbody',5,'Roles: '+e.message.slice(0,60));}
+  try{d.roles=await gcpPaged(`https://iam.googleapis.com/v1/projects/${acct.project}/roles?pageSize=100&view=FULL`,acct.token,'roles');renderGCPRoles(d.roles,acct);document.getElementById('tc-gcp-r').textContent=d.roles.length;ok++;}catch(e){setEmpty('tb-gcp-r-tbody',5,'Roles: '+e.message.slice(0,60));}
   return ok;
 }
 function renderGCPSAs(sas,acct){
@@ -1153,15 +1164,15 @@ async function fetchOCI(acct,mode){
   const subEl=document.getElementById('oci-sub');if(subEl)subEl.textContent=acctDesc('oci',acct);
   if(mode==='machine'){
     setLoading('tb-oci-vm-tbody',8);setLoading('tb-oci-dg-tbody',6);
-    try{const r=await fetch(`${compBase}/instances?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok){const j=await r.json();throw new Error(j.message||'Compute HTTP '+r.status);}const j=await r.json();d.instances=j;renderOCIInst(j,acct);document.getElementById('tc-oci-vm').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-vm-tbody',8,'Instances: '+e.message.slice(0,60));}
-    try{const r=await fetch(`${idBase}/dynamicGroups?compartmentId=${encodeURIComponent(acct.tenancy)}&limit=100`,{headers:H});if(!r.ok)throw new Error('DynGroups HTTP '+r.status);const j=await r.json();d.dynGroups=j;renderOCIDynGroups(j,acct);document.getElementById('tc-oci-dg').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-dg-tbody',6,'DynGroups: '+e.message.slice(0,60));}
+    try{d.instances=await ociPaged(`${compBase}/instances?compartmentId=${encodeURIComponent(cid)}&limit=1000`,H);renderOCIInst(d.instances,acct);document.getElementById('tc-oci-vm').textContent=d.instances.length;ok++;}catch(e){setEmpty('tb-oci-vm-tbody',8,'Instances: '+e.message.slice(0,60));}
+    try{d.dynGroups=await ociPaged(`${idBase}/dynamicGroups?compartmentId=${encodeURIComponent(acct.tenancy)}&limit=1000`,H);renderOCIDynGroups(d.dynGroups,acct);document.getElementById('tc-oci-dg').textContent=d.dynGroups.length;ok++;}catch(e){setEmpty('tb-oci-dg-tbody',6,'DynGroups: '+e.message.slice(0,60));}
     return ok;
   }
   setLoading('tb-oci-u-tbody',7);setLoading('tb-oci-g-tbody',5);setLoading('tb-oci-p-tbody',6);setLoading('tb-oci-c-tbody',6);
-  try{const r=await fetch(`${idBase}/users?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok){const j=await r.json();throw new Error(j.message||'Users HTTP '+r.status);}const j=await r.json();d.users=j;renderOCIUsers(j,acct);document.getElementById('tc-oci-u').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-u-tbody',7,'Users: '+e.message.slice(0,60));}
-  try{const r=await fetch(`${idBase}/groups?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok)throw new Error('Groups HTTP '+r.status);const j=await r.json();d.groups=j;renderOCIGroups(j,acct);document.getElementById('tc-oci-g').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-g-tbody',5,'Groups: '+e.message.slice(0,60));}
-  try{const r=await fetch(`${idBase}/policies?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok)throw new Error('Policies HTTP '+r.status);const j=await r.json();d.policies=j;renderOCIPolicies(j,acct);document.getElementById('tc-oci-p').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-p-tbody',6,'Policies: '+e.message.slice(0,60));}
-  try{const r=await fetch(`${idBase}/compartments?compartmentId=${encodeURIComponent(cid)}&limit=100`,{headers:H});if(!r.ok)throw new Error('Comps HTTP '+r.status);const j=await r.json();d.compartments=j;renderOCIComps(j,acct);document.getElementById('tc-oci-c').textContent=j.length;ok++;}catch(e){setEmpty('tb-oci-c-tbody',6,'Comps: '+e.message.slice(0,60));}
+  try{d.users=await ociPaged(`${idBase}/users?compartmentId=${encodeURIComponent(cid)}&limit=1000`,H);renderOCIUsers(d.users,acct);document.getElementById('tc-oci-u').textContent=d.users.length;ok++;}catch(e){setEmpty('tb-oci-u-tbody',7,'Users: '+e.message.slice(0,60));}
+  try{d.groups=await ociPaged(`${idBase}/groups?compartmentId=${encodeURIComponent(cid)}&limit=1000`,H);renderOCIGroups(d.groups,acct);document.getElementById('tc-oci-g').textContent=d.groups.length;ok++;}catch(e){setEmpty('tb-oci-g-tbody',5,'Groups: '+e.message.slice(0,60));}
+  try{d.policies=await ociPaged(`${idBase}/policies?compartmentId=${encodeURIComponent(cid)}&limit=1000`,H);renderOCIPolicies(d.policies,acct);document.getElementById('tc-oci-p').textContent=d.policies.length;ok++;}catch(e){setEmpty('tb-oci-p-tbody',6,'Policies: '+e.message.slice(0,60));}
+  try{d.compartments=await ociPaged(`${idBase}/compartments?compartmentId=${encodeURIComponent(cid)}&limit=1000`,H);renderOCIComps(d.compartments,acct);document.getElementById('tc-oci-c').textContent=d.compartments.length;ok++;}catch(e){setEmpty('tb-oci-c-tbody',6,'Comps: '+e.message.slice(0,60));}
   return ok;
 }
 function renderOCIUsers(users,acct){
@@ -1327,6 +1338,70 @@ function updateOvCard(p){
 }
 
 // ═══ UTILITIES ═══
+
+// ═══ PAGINATION HELPERS ═══
+async function awsIAMPaged(action, baseParams, acct, memberTag) {
+  let items = [], mk = null;
+  do {
+    const p = {...baseParams, MaxItems: 200};
+    if (mk) p.Marker = mk;
+    const doc = await awsIAM(action, p, acct);
+    xmlNs(doc, memberTag || 'member').forEach(n => items.push(n));
+    mk = xmlV(doc.documentElement, 'IsTruncated') === 'true' ? xmlV(doc.documentElement, 'Marker') : null;
+  } while (mk);
+  return items;
+}
+
+async function graphPaged(url, token) {
+  let items = [], nextUrl = url;
+  while (nextUrl) {
+    const r = await fetch(nextUrl, { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) { const j = await r.json(); throw new Error(j.error?.message || 'HTTP ' + r.status); }
+    const j = await r.json();
+    items = items.concat(j.value || []);
+    nextUrl = j['@odata.nextLink'] || null;
+  }
+  return items;
+}
+
+async function gcpPaged(baseUrl, token, dataKey) {
+  let items = [], pageToken = null;
+  do {
+    const url = baseUrl + (pageToken ? (baseUrl.includes('?') ? '&' : '?') + 'pageToken=' + encodeURIComponent(pageToken) : '');
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) { const j = await r.json(); throw new Error(j.error?.message || 'HTTP ' + r.status); }
+    const j = await r.json();
+    items = items.concat(j[dataKey] || []);
+    pageToken = j.nextPageToken || null;
+  } while (pageToken);
+  return items;
+}
+
+async function ociPaged(baseUrl, headers) {
+  let items = [], page = null;
+  do {
+    const url = baseUrl + (page ? (baseUrl.includes('?') ? '&' : '?') + 'page=' + encodeURIComponent(page) : '');
+    const r = await fetch(url, { headers });
+    if (!r.ok) { const j = await r.json(); throw new Error(j.message || 'HTTP ' + r.status); }
+    const j = await r.json();
+    items = items.concat(j || []);
+    page = r.headers.get('opc-next-page') || null;
+  } while (page);
+  return items;
+}
+
+async function armPaged(baseUrl, token) {
+  let items = [], nextUrl = baseUrl;
+  while (nextUrl) {
+    const r = await fetch(nextUrl, { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) throw new Error('ARM HTTP ' + r.status);
+    const j = await r.json();
+    items = items.concat(j.value || []);
+    nextUrl = j.nextLink || null;
+  }
+  return items;
+}
+
 function srch(dataKey,q,tbodyId,renderFn){const data=window[dataKey]||[];renderFn(data.filter(item=>JSON.stringify(item).toLowerCase().includes(q.toLowerCase())));}
 function exportD(key,filename){const data=window[key]||S.findings||[];if(!data.length){toast('No data','warn');return;}const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();toast(`Exported ${data.length} records`,'success');}
 function exportAll(){const blob=new Blob([JSON.stringify({accounts:S.accounts,data:S.data,findings:S.findings},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='anugal_ciem_full.json';a.click();toast('Full export downloaded','success');}
